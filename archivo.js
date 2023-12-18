@@ -5,13 +5,13 @@ class ProductManager {
     }
   
     addProduct(title, description, price, thumbnail, code, stock) {
-      // Validar que todos los campos sean proporcionados
+     
       if (!title || !description || !price || !thumbnail || !code || !stock) {
         console.log("Todos los campos son obligatorios");
         return;
       }
   
-      // Validar que no se repita el campo 'code'
+     
       const codeExists = this.products.some(product => product.code === code);
       if (codeExists) {
         console.log("El código ya existe. Introduce un código único.");
@@ -29,7 +29,7 @@ class ProductManager {
       };
   
       this.products.push(newProduct);
-      this.productId++; // Incrementar el ID para el próximo producto
+      this.productId++; 
       console.log("Producto agregado:", newProduct);
     }
   
@@ -46,8 +46,7 @@ class ProductManager {
       return product;
     }
   }
-  
-  // Ejemplo de uso
+
   const manager = new ProductManager();
   
   manager.addProduct("Producto 1", "Descripción del producto 1", 25, "imagen1.jpg", "ABC123", 10);
