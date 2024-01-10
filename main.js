@@ -1,4 +1,5 @@
 const ProductManager = require('./ProductManager');
+const uploadToServer = require('./uploadFile');
 
 const productManager = new ProductManager('productos.json');
 
@@ -15,3 +16,5 @@ console.log(productManager.getProducts());
 
 productManager.updateProduct(1, { price: 60 });
 productManager.deleteProduct(1);
+
+uploadToServer(productos.json); 
