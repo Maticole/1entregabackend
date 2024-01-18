@@ -37,7 +37,7 @@ class ProductManager {
     this.saveProducts();
   }
 
-  getProducts() {
+  getAllProducts() {
     return this.products;
   }
 
@@ -68,3 +68,6 @@ class ProductManager {
 }
 
 module.exports = ProductManager;
+
+
+

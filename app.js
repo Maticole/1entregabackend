@@ -1,7 +1,9 @@
 const express = require('express');
 const ProductManager = require('./ProductManager'); 
 const app = express();
-const productManager = new ProductManager('productos.json'); 
+const productManager = new ProductManager('./productos.json');
+const productRouter = require('./productRouter'); 
+const cartRouter = require('./uploadFile');
 
 
 app.get('/products', (req, res) => {
@@ -28,8 +30,19 @@ app.get('/products/:pid', (req, res) => {
   }
 });
 
+// const app = express();
+const PORT = 8080;
+app.use(express.json());
 
-const PORT = 3000;
+
+app.use('/api/products', productRouter);
+
+
+app.use('/api/carts', cartRouter);
 app.listen(PORT, () => {
   console.log(`Servidor Express iniciado en el puerto ${PORT}`);
 });
+
+
+
+
