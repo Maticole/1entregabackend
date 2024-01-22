@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const productManager = require('./ProductManager'); 
+const productManager = require('../models/ProductManager'); 
 
 router.get('/', (req, res) => {
   res.json({ products: productManager.getAllProducts() });

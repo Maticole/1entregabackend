@@ -1,15 +1,15 @@
 const express = require('express');
-const ProductManager = require('./ProductManager'); 
+const ProductManager = require('./models/ProductManager');
 const app = express();
-const productManager = new ProductManager('./productos.json');
-const productRouter = require('./productRouter'); 
-const cartRouter = require('./uploadFile');
+const productManager = new ProductManager('./data/productos.json');
+const productRouter = require('./routes/productRouter');
+const cartRouter = require('./utils/uploadFile');
 
 
 app.get('/products', (req, res) => {
   let products = productManager.getProducts();
 
-  
+
   const limit = parseInt(req.query.limit);
   if (!isNaN(limit)) {
     products = products.slice(0, limit);
@@ -42,7 +42,3 @@ app.use('/api/carts', cartRouter);
 app.listen(PORT, () => {
   console.log(`Servidor Express iniciado en el puerto ${PORT}`);
 });
-
-
-
-
