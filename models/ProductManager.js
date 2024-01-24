@@ -12,6 +12,9 @@ class ProductManager {
       const data = fs.readFileSync(this.path, 'utf8');
       if (data) {
         this.products = JSON.parse(data);
+      } else {
+        this.products = [{ id: 1, title: "Ejemplo", price: 10 }];
+        this.saveProducts();
       }
     } catch (error) {
       console.log("Error al cargar los productos:", error.message);

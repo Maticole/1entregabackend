@@ -1,20 +1,43 @@
 const express = require('express');
-const router = express.Router();
-const productManager = require('../models/ProductManager'); 
+const productManager = require('../models/ProductManager');
+const productRouter = express.Router();
 
-router.get('/', (req, res) => {
-  res.json({ products: productManager.getAllProducts() });
+productRouter.get('/', (req, res) => {
+  const products = productManager.getAllProducts();
+  res.render('index', { products });
 });
 
-router.get('/:pid', (req, res) => {
+productRouter.get('/:pid', (req, res) => {
   const productId = parseInt(req.params.pid);
   const product = productManager.getProductById(productId);
 
   if (product) {
-    res.json({ product });
+    res.render('productDetail', { product });
   } else {
     res.status(404).json({ message: 'Producto no encontrado' });
   }
 });
 
-module.exports = router;
+productRouter.post('/', (req, res) => {
+  const productData = req.body;
+  productManager.addProduct(productData);
+  io.emit('actualizarProductos', productData);
+  res.status(201).json({ message: 'Producto creado exitosamente' });
+});
+
+productRouter.put('/:pid', (req, res) => {
+  const productId = parseInt(req.params.pid);
+  const updatedFields = req.body;
+  productManager.updateProduct(productId, updatedFields);
+  io.emit('actualizarProductos', { id: productId, ...updatedFields });
+  res.json({ message: 'Producto actualizado exitosamente' });
+});
+
+productRouter.delete('/:pid', (req, res) => {
+  const productId = parseInt(req.params.pid);
+  productManager.deleteProduct(productId);
+  io.emit('eliminarProducto', { id: productId });
+  res.json({ message: 'Producto eliminado exitosamente' });
+});
+
+module.exports = productRouter;

@@ -1,44 +1,41 @@
 const express = require('express');
+const expressHandlebars = require('express-handlebars');
+const http = require('http');
+const socketIO = require('socket.io');
 const ProductManager = require('./models/ProductManager');
-const app = express();
-const productManager = new ProductManager('./data/productos.json');
 const productRouter = require('./routes/productRouter');
-const cartRouter = require('./utils/uploadFile');
+const cartRouter = require('./routes/cartRouter');
 
+const app = express();
+const server = http.createServer(app);
+const io = socketIO(server);
+const productManager = new ProductManager('./data/productos.json');
 
-app.get('/products', (req, res) => {
-  let products = productManager.getProducts();
-
-
-  const limit = parseInt(req.query.limit);
-  if (!isNaN(limit)) {
-    products = products.slice(0, limit);
-  }
-
-  res.json({ products });
-});
-
-
-app.get('/products/:pid', (req, res) => {
-  const productId = parseInt(req.params.pid);
-  const product = productManager.getProductById(productId);
-
-  if (product) {
-    res.json({ product });
-  } else {
-    res.status(404).json({ message: 'Producto no encontrado' });
-  }
-});
-
-// const app = express();
 const PORT = 8080;
+
+const hbs = expressHandlebars.create({
+  defaultLayout: 'main', 
+  extname: '.handlebars',
+});
+
+app.engine('handlebars', hbs.engine);
+app.set('view engine', 'handlebars');
+
 app.use(express.json());
 
+app.use(express.static('public'));
 
 app.use('/api/products', productRouter);
-
-
 app.use('/api/carts', cartRouter);
-app.listen(PORT, () => {
+
+io.on('connection', (socket) => {
+  console.log('Nuevo cliente conectado');
+
+  socket.on('nuevoProducto', (producto) => {
+    io.emit('actualizarProductos', producto);
+  });
+});
+
+server.listen(PORT, () => {
   console.log(`Servidor Express iniciado en el puerto ${PORT}`);
 });

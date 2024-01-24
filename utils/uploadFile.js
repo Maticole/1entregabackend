@@ -1,7 +1,7 @@
 const fs = require('fs');
 const axios = require('axios');
 
-const uploadToServer = (filePath = 'productos.json') => {
+const uploadToServer = (filePath = './data/productos.json') => {
   try {
     const fileData = fs.readFileSync(filePath, 'utf8');
 
