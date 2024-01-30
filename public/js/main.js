@@ -1,5 +1,5 @@
 const ProductManager = require('../models/ProductManager');
-const uploadToServer = require('./utils/uploadFile');
+const uploadToServer = require('../../utils/uploadFile');
 
 const productManager = new ProductManager('../data/productos.json');
 

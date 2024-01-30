@@ -14,7 +14,7 @@ const productManager = new ProductManager('./data/productos.json');
 const PORT = 8080;
 
 const hbs = expressHandlebars.create({
-  defaultLayout: 'main', 
+  defaultLayout: 'main',
   extname: '.handlebars',
 });
 
@@ -22,7 +22,6 @@ app.engine('handlebars', hbs.engine);
 app.set('view engine', 'handlebars');
 
 app.use(express.json());
-
 app.use(express.static('public'));
 
 app.use('/api/products', productRouter);
@@ -31,8 +30,12 @@ app.use('/api/carts', cartRouter);
 io.on('connection', (socket) => {
   console.log('Nuevo cliente conectado');
 
-  socket.on('nuevoProducto', (producto) => {
-    io.emit('actualizarProductos', producto);
+  socket.on('nuevoProducto', async (producto) => {
+    await productManager.addProduct(producto);
+
+    const updatedProducts = productManager.getAllProducts();
+
+    io.emit('actualizarProductos', updatedProducts);
   });
 });
 
