@@ -1,20 +1,18 @@
-const ProductManager = require('../models/ProductManager');
-const uploadToServer = require('../../utils/uploadFile');
-
-const productManager = new ProductManager('../data/productos.json');
-
-productManager.addProduct({
-  title: 'Producto de ejemplo',
-  description: 'Descripción del producto de ejemplo',
-  price: 50,
-  thumbnail: 'imagen.jpg',
-  code: 'ABC123',
-  stock: 20
+const form = document.getElementById('productForm');
+form.addEventListener('submit', (event) => {
+  event.preventDefault();
+  
+  const formData = new FormData(form);
+  const productData = {
+    title: formData.get('title'),
+    description: formData.get('description'),
+    price: formData.get('price'),
+    thumbnail: formData.get('thumbnail'),
+    code: formData.get('code'),
+    stock: formData.get('stock')
+  };
+  
+  socket.emit('nuevoProducto', productData);
+  
+  form.reset();
 });
-
-console.log(productManager.getAllProducts());
-
-productManager.updateProduct(1, { price: 60 });
-productManager.deleteProduct(1);
-
-uploadToServer('../data/productos.json'); 

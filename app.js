@@ -30,13 +30,14 @@ app.use('/api/carts', cartRouter);
 io.on('connection', (socket) => {
   console.log('Nuevo cliente conectado');
 
+  
   socket.on('nuevoProducto', async (producto) => {
     await productManager.addProduct(producto);
 
-    const updatedProducts = productManager.getAllProducts();
-
-    io.emit('actualizarProductos', updatedProducts);
+    
+    io.emit('actualizarProductos', productManager.getAllProducts());
   });
+ 
 });
 
 server.listen(PORT, () => {
