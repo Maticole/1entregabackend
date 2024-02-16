@@ -2,7 +2,8 @@ const express = require('express');
 const expressHandlebars = require('express-handlebars');
 const http = require('http');
 const socketIO = require('socket.io');
-const ProductManager = require('./models/ProductManager');
+const mongoose = require('mongoose');
+const ProductManager = require('./dao/fileSystem/ProductManager');
 const productRouter = require('./routes/productRouter');
 const cartRouter = require('./routes/cartRouter');
 
@@ -39,6 +40,13 @@ io.on('connection', (socket) => {
   });
  
 });
+
+mongoose.connect('mongodb+srv://maticole1980:<Trinidad1912>@maticoder.gw5gwny.mongodb.net/?retryWrites=true&w=majority', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('Conexión a MongoDB Atlas establecida'))
+.catch(err => console.error('Error al conectar a MongoDB Atlas:', err));
 
 server.listen(PORT, () => {
   console.log(`Servidor Express iniciado en el puerto ${PORT}`);
