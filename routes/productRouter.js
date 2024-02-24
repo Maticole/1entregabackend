@@ -2,14 +2,13 @@ const express = require('express');
 const productManager = require('../dao/ProductManager');
 const productRouter = express.Router();
 
-productRouter.post('/', async (req, res) => {
-  const productData = req.body;
+productRouter.get('/', async (req, res) => {
+  const { limit = 10, page = 1, sort, query } = req.query;
   try {
-    await productManager.addProduct(productData);
-    io.emit('actualizarProductos', await productManager.getAllProducts());
-    res.status(201).json({ message: 'Producto creado exitosamente' });
+    const result = await productManager.getProducts({ limit, page, sort, query });
+    res.json(result);
   } catch (error) {
-    console.error("Error al crear el producto:", error.message);
+    console.error("Error al obtener los productos:", error.message);
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });

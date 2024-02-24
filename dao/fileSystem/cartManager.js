@@ -28,12 +28,11 @@ class CartManager {
 
   async getCartById(id) {
     try {
-      return await Cart.findById(id);
+      return await Cart.findById(id).populate('products.productId');
     } catch (error) {
       console.error("Error al obtener el carrito por ID:", error.message);
       return null;
     }
   }
-}
 
 module.exports = CartManager;
