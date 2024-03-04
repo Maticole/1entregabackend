@@ -33,6 +33,6 @@ class CartManager {
       console.error("Error al obtener el carrito por ID:", error.message);
       return null;
     }
-  }
+  }}
 
 module.exports = CartManager;

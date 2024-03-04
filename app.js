@@ -31,14 +31,25 @@ app.use('/api/carts', cartRouter);
 io.on('connection', (socket) => {
   console.log('Nuevo cliente conectado');
 
-  
   socket.on('nuevoProducto', async (producto) => {
     await productManager.addProduct(producto);
-
     
-    io.emit('actualizarProductos', productManager.getAllProducts());
+    io.emit('actualizarProductos', await productManager.getAllProducts());
   });
- 
+});
+
+
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  
+  if (email ===  && password === ) {
+    
+  res.redirect('/productos');
+} else {
+  
+  res.redirect('/login?error=credencialesInvalidas');
+}
 });
 
 mongoose.connect('mongodb+srv://maticole1980:<Trinidad1912>@maticoder.gw5gwny.mongodb.net/?retryWrites=true&w=majority', {
