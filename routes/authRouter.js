@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const User = require('../models/userSchema');
+const passport = require('passport');
 
 const authRouter = express.Router();
 
@@ -11,7 +12,6 @@ authRouter.post('/register', async (req, res) => {
     if (existingUser) {
       return res.status(400).json({ error: 'El usuario ya existe' });
     }
-    
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({ email, password: hashedPassword });
     await newUser.save();
@@ -41,5 +41,17 @@ authRouter.post('/login', async (req, res) => {
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });
+
+authRouter.post('/login', passport.authenticate('local', {
+  successRedirect: '/productos',
+  failureRedirect: '/login?error=credencialesInvalidas'
+}));
+
+authRouter.get('/auth/github', passport.authenticate('github'));
+authRouter.get('/auth/github/callback',
+  passport.authenticate('github', { failureRedirect: '/login' }),
+  (req, res) => {
+    res.redirect('/productos');
+  });
 
 module.exports = authRouter;

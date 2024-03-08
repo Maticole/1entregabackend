@@ -19,6 +19,16 @@ const hbs = expressHandlebars.create({
   extname: '.handlebars',
 });
 
+const expressSession = require('express-session');
+app.use(expressSession({
+  secret: 'miSecreto',
+  resave: false,
+  saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.engine('handlebars', hbs.engine);
 app.set('view engine', 'handlebars');
 
