@@ -1,7 +1,11 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
-const User = require('../models/userSchema');
+const jwt = require('jsonwebtoken');
 const passport = require('passport');
+const User = require('../models/userSchema');
+
+
+const secretKey = 'c0d116c2bde42e5a425872b6a63ebd4d44485bb4939e922ed700f84aa5283215';
 
 const authRouter = express.Router();
 
@@ -35,23 +39,17 @@ authRouter.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Contraseña incorrecta' });
     }
     
-    res.json({ message: 'Inicio de sesión exitoso', user });
+    const token = jwt.sign({ id: user._id }, secretKey, { expiresIn: '1h' });
+    
+    res.json({ message: 'Inicio de sesión exitoso', token });
   } catch (error) {
     console.error("Error al iniciar sesión:", error.message);
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });
 
-authRouter.post('/login', passport.authenticate('local', {
-  successRedirect: '/productos',
-  failureRedirect: '/login?error=credencialesInvalidas'
-}));
-
-authRouter.get('/auth/github', passport.authenticate('github'));
-authRouter.get('/auth/github/callback',
-  passport.authenticate('github', { failureRedirect: '/login' }),
-  (req, res) => {
-    res.redirect('/productos');
-  });
+authRouter.get('/current', passport.authenticate('jwt', { session: false }), (req, res) => {
+  res.json(req.user);
+});
 
 module.exports = authRouter;

@@ -1,10 +1,9 @@
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const GitHubStrategy = require('passport-github').Strategy;
 const bcrypt = require('bcryptjs');
 const User = require('../models/userSchema');
 
-passport.use(new LocalStrategy({
+passport.use('local', new LocalStrategy({
     usernameField: 'email'
   },
   async (email, password, done) => {
@@ -16,25 +15,6 @@ passport.use(new LocalStrategy({
       const passwordMatch = await bcrypt.compare(password, user.password);
       if (!passwordMatch) {
         return done(null, false, { message: 'Contraseña incorrecta' });
-      }
-      return done(null, user);
-    } catch (error) {
-      return done(error);
-    }
-  }
-));
-
-passport.use(new GitHubStrategy({
-    clientID: 'Iv1.c9d6967bdc087a96',
-    clientSecret: '01d69ec5b1e7053b018f0dddf90902f9e2f1b2cf',
-    callbackURL: 'http://localhost:8080/auth/github/callback'
-  },
-  async (accessToken, refreshToken, profile, done) => {
-    try {
-      let user = await User.findOne({ githubId: profile.id });
-      if (!user) {
-        user = new User({ githubId: profile.id, email: profile.emails[0].value });
-        await user.save();
       }
       return done(null, user);
     } catch (error) {
@@ -55,3 +35,5 @@ passport.deserializeUser(async (id, done) => {
     done(error);
   }
 });
+
+module.exports = passport;
