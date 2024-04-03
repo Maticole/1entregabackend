@@ -75,7 +75,7 @@ app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   
-  if (email ===  && password === ) {
+  if (email === '' || password === '') {
     
   res.redirect('/productos');
 } else {
