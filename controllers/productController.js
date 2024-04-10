@@ -1,4 +1,6 @@
-const productManager = require('../dao/ProductManager');
+const DAOFactory = require('../dao/daoFactory'); 
+
+const productManager = DAOFactory.getDAO('fileSystem');
 
 const productController = {
   getProducts: async (req, res) => {

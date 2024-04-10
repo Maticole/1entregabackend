@@ -1,28 +1,34 @@
-const User = require('../models/UserModel');
+const UserRepository = require('../dao/userRepository');
+const UserDTO = require('../dto/UserDTO');
 
-async function githubStrategyCallback(accessToken, refreshToken, profile, done) {
+const userRepository = new UserRepository();
+
+async function authorizeUser(req, res, next) {
   try {
-    let user = await User.findOne({ githubId: profile.id });
-    if (!user) {
-      user = new User({
-        githubId: profile.id,
-        email: profile.emails[0].value,
-        first_name: profile.displayName.split(' ')[0],
-        last_name: profile.displayName.split(' ')[1]
-      });
-      await user.save();
+    if (req.user && req.user.role === 'admin') {
+      next();
+    } else {
+      res.status(403).json({ error: 'Acceso no autorizado' });
     }
-    return done(null, user);
   } catch (error) {
-    return done(error);
+    console.error('Error de autorización:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 }
 
-function githubCallback(req, res) {
-  res.redirect('/productos');
+
+async function getCurrentUser(req, res) {
+  try {
+    const user = await userRepository.getUserById(req.user.id);
+    const userDTO = new UserDTO(user);
+    res.json(userDTO);
+  } catch (error) {
+    console.error("Error al obtener el usuario actual:", error.message);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
 }
 
 module.exports = {
-  githubStrategyCallback,
-  githubCallback,
+  getCurrentUser,
+  authorizeUser,
 };
