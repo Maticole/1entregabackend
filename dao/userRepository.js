@@ -1,22 +1,26 @@
 const User = require('../models/UserModel');
 
 class UserRepository {
-  async getAllUsers() {
+  constructor(model) {
+    this.model = model;
+  }
+
+  async getAll() {
     try {
-      return await User.find();
+      return await this.model.find();
     } catch (error) {
       console.error("Error al obtener todos los usuarios:", error.message);
       return [];
     }
   }
 
-  async getUserById(userId) {
-    return await User.findById(userId);
+  async getById(id) {
+    return await this.model.findById(id);
   }
 
-  async createUser(userData) {
+  async create(data) {
     try {
-      const newUser = new User(userData);
+      const newUser = new this.model(data);
       await newUser.save();
       console.log("Usuario creado correctamente.");
     } catch (error) {
@@ -24,12 +28,12 @@ class UserRepository {
     }
   }
 
-  async updateUser(userId, userData) {
-    return await User.findByIdAndUpdate(userId, userData);
+  async update(id, data) {
+    return await this.model.findByIdAndUpdate(id, data);
   }
 
-  async deleteUser(userId) {
-    return await User.findByIdAndDelete(userId);
+  async delete(id) {
+    return await this.model.findByIdAndDelete(id);
   }
 }
 
