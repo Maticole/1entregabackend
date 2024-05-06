@@ -1,4 +1,6 @@
-const DAOFactory = require('../dao/daoFactory'); 
+const DAOFactory = require('../dao/daoFactory');
+const Product = require('../models/ProductModel');
+const User = require('../models/UserModel');
 
 const productManager = DAOFactory.getDAO('fileSystem');
 
@@ -15,9 +17,9 @@ const productController = {
   },
 
   addProduct: async (req, res) => {
-    const productData = req.body; 
+    const productData = req.body;
     try {
-      await productManager.addProduct(productData); 
+      await productManager.addProduct(productData);
       res.status(201).json({ message: 'Producto creado exitosamente' });
     } catch (error) {
       console.error("Error al crear el producto:", error.message);
@@ -26,7 +28,7 @@ const productController = {
   },
 
   getProductById: async (req, res) => {
-    const productId = req.params.id; 
+    const productId = req.params.id;
     try {
       const product = await productManager.getProductById(productId);
       if (product) {
@@ -41,11 +43,21 @@ const productController = {
   },
 
   updateProduct: async (req, res) => {
-    const productId = req.params.id; 
-    const updatedProductData = req.body; 
+    const productId = req.params.id;
+    const updatedProductData = req.body;
     try {
-      await productManager.updateProduct(productId, updatedProductData); 
-      res.json({ message: 'Producto actualizado exitosamente' });
+      const product = await Product.findById(productId);
+
+      if (!product) {
+        return res.status(404).json({ error: 'Producto no encontrado' });
+      }
+      
+      if (req.user.role === 'admin' || product.owner.equals(req.user._id)) {
+        await productManager.updateProduct(productId, updatedProductData);
+        return res.json({ message: 'Producto actualizado exitosamente' });
+      } else {
+        return res.status(403).json({ error: 'No tienes permiso para actualizar este producto' });
+      }
     } catch (error) {
       console.error("Error al actualizar el producto:", error.message);
       res.status(500).json({ error: "Error interno del servidor" });
@@ -53,10 +65,20 @@ const productController = {
   },
 
   deleteProduct: async (req, res) => {
-    const productId = req.params.id; 
+    const productId = req.params.id;
     try {
-      await productManager.deleteProduct(productId); 
-      res.json({ message: 'Producto eliminado exitosamente' });
+      const product = await Product.findById(productId);
+
+      if (!product) {
+        return res.status(404).json({ error: 'Producto no encontrado' });
+      }
+      
+      if (req.user.role === 'admin' || product.owner.equals(req.user._id)) {
+        await productManager.deleteProduct(productId);
+        return res.json({ message: 'Producto eliminado exitosamente' });
+      } else {
+        return res.status(403).json({ error: 'No tienes permiso para eliminar este producto' });
+      }
     } catch (error) {
       console.error("Error al eliminar el producto:", error.message);
       res.status(500).json({ error: "Error interno del servidor" });

@@ -1,34 +1,46 @@
-const UserRepository = require('../dao/userRepository');
-const UserDTO = require('../dto/UserDTO');
+const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
+const bcrypt = require('bcrypt');
+const User = require('../models/UserModel');
 
-const userRepository = new UserRepository();
+const generateToken = (payload) => {
+  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+};
 
-async function authorizeUser(req, res, next) {
+
+const sendPasswordResetEmail = async (email, token) => {
+  const transporter = nodemailer.createTransport({
+    
+  });
+
+  const mailOptions = {
+    from: 'your@example.com',
+    to: email,
+    subject: 'Recuperación de contraseña',
+    text: `Haga clic en el siguiente enlace para restablecer su contraseña: ${process.env.CLIENT_URL}/reset-password/${token}`,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+const requestPasswordReset = async (req, res, next) => {
   try {
-    if (req.user && req.user.role === 'admin') {
-      next();
-    } else {
-      res.status(403).json({ error: 'Acceso no autorizado' });
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
     }
-  } catch (error) {
-    console.error('Error de autorización:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
-}
 
+    const token = generateToken({ email });
+    await sendPasswordResetEmail(email, token);
 
-async function getCurrentUser(req, res) {
-  try {
-    const user = await userRepository.getUserById(req.user.id);
-    const userDTO = new UserDTO(user);
-    res.json(userDTO);
+    return res.status(200).json({ message: 'Correo de restablecimiento enviado' });
   } catch (error) {
-    console.error("Error al obtener el usuario actual:", error.message);
-    res.status(500).json({ error: "Error interno del servidor" });
+    return res.status(500).json({ message: 'Error interno del servidor' });
   }
-}
+};
 
 module.exports = {
-  getCurrentUser,
-  authorizeUser,
+  requestPasswordReset,
 };
