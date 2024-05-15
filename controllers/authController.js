@@ -7,7 +7,6 @@ const generateToken = (payload) => {
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 };
 
-
 const sendPasswordResetEmail = async (email, token) => {
   const transporter = nodemailer.createTransport({
     
@@ -41,6 +40,32 @@ const requestPasswordReset = async (req, res, next) => {
   }
 };
 
+const resetPassword = async (req, res, next) => {
+  
+};
+
+const updatePassword = async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+    const user = req.user; 
+    
+    
+    if (!newPassword) {
+      return res.status(400).json({ message: 'Se requiere una nueva contraseña' });
+    }
+
+    
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    return res.status(200).json({ message: 'Contraseña actualizada exitosamente' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error interno del servidor' });
+  }
+};
+
 module.exports = {
   requestPasswordReset,
+  resetPassword,
+  updatePassword, 
 };

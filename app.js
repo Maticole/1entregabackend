@@ -10,6 +10,8 @@ const ProductManager = require('./dao/fileSystem/ProductManager');
 const productRouter = require('./routes/productRouter');
 const cartRouter = require('./routes/cartRouter');
 const authRouter = require('./routes/authRouter');
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 
 const app = express();
 const server = http.createServer(app);
@@ -22,15 +24,24 @@ app.use(session({ secret: config.sessionSecret, resave: false, saveUninitialized
 app.use(passport.initialize());
 app.use(passport.session());
 
-
-app.use('/api/products', productRouter);
-app.use('/api/carts', cartRouter);
-app.use('/auth', authRouter);
-
-
 mongoose.connect(config.mongodbURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Conexión a MongoDB Atlas establecida'))
   .catch(err => console.error('Error al conectar a MongoDB Atlas:', err));
+
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'API de Productos y Carrito',
+      version: '1.0.0',
+      description: 'Documentación de la API de Productos y Carrito',
+    },
+  },
+  apis: ['./routes/productRouter.js', './routes/cartRouter.js'], 
+};
+
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 server.listen(config.port, () => {
   console.log(`Servidor Express iniciado en el puerto ${config.port}`);
@@ -59,6 +70,7 @@ app.use(express.static('public'));
 
 app.use('/api/products', productRouter);
 app.use('/api/carts', cartRouter);
+app.use('/auth', authRouter);
 
 io.on('connection', (socket) => {
   console.log('Nuevo cliente conectado');
