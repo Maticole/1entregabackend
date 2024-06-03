@@ -7,7 +7,7 @@ const expect = chai.expect;
 
 describe('Router de Sessions', () => {
   describe('POST /api/login', () => {
-    it('should log in a user with valid credentials', (done) => {
+    it('debe iniciar sesión como usuario con credenciales válidas', (done) => {
       
       chai.request(app)
         .post('/api/login')

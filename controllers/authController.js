@@ -3,13 +3,15 @@ const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const User = require('../models/UserModel');
 
+
 const generateToken = (payload) => {
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 };
 
+
 const sendPasswordResetEmail = async (email, token) => {
   const transporter = nodemailer.createTransport({
-    
+
   });
 
   const mailOptions = {
@@ -21,6 +23,7 @@ const sendPasswordResetEmail = async (email, token) => {
 
   await transporter.sendMail(mailOptions);
 };
+
 
 const requestPasswordReset = async (req, res, next) => {
   try {
@@ -40,21 +43,41 @@ const requestPasswordReset = async (req, res, next) => {
   }
 };
 
+
 const resetPassword = async (req, res, next) => {
-  
+  try {
+    const { newPassword } = req.body;
+    const user = req.user;
+
+
+    if (!newPassword) {
+      return res.status(400).json({ message: 'Se requiere una nueva contraseña' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+
+    user.password = hashedPassword;
+    await user.save();
+
+
+    return res.status(200).json({ message: 'Contraseña restablecida exitosamente' });
+  } catch (error) {
+
+    console.error('Error al restablecer la contraseña:', error);
+    return res.status(500).json({ message: 'Error interno del servidor' });
+  }
 };
 
 const updatePassword = async (req, res) => {
   try {
     const { newPassword } = req.body;
-    const user = req.user; 
-    
-    
+    const user = req.user;
+
     if (!newPassword) {
       return res.status(400).json({ message: 'Se requiere una nueva contraseña' });
     }
 
-    
     user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
 
@@ -67,5 +90,5 @@ const updatePassword = async (req, res) => {
 module.exports = {
   requestPasswordReset,
   resetPassword,
-  updatePassword, 
+  updatePassword,
 };

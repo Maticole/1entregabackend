@@ -5,9 +5,9 @@ const User = require('../models/UserModel');
 const resetPassword = async (req, res, next) => {
   try {
     const { token, newPassword } = req.body;
-    
+
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    
+
     const user = await User.findOne({ email: payload.email });
 
     if (!user) {
@@ -29,6 +29,33 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
+const uploadDocuments = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.uid);
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: 'No se han subido documentos' });
+    }
+
+    const documents = req.files.map(file => ({
+      name: file.originalname,
+      reference: file.path
+    }));
+
+    user.documents = documents;
+    await user.save();
+
+    return res.status(200).json({ message: 'Documentos subidos exitosamente' });
+  } catch (error) {
+    console.error('Error al subir documentos:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
 module.exports = {
   resetPassword,
+  uploadDocuments,
 };
