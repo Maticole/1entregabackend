@@ -1,6 +1,56 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/UserModel');
+const nodemailer = require('nodemailer');
+
+
+const sendInactiveUserEmail = async (email) => {
+  const transporter = nodemailer.createTransport({
+    
+    service: 'Gmail', 
+    auth: {
+      user: 'tu_correo@gmail.com',
+      pass: 'tu_contraseña', 
+    },
+  });
+
+  const mailOptions = {
+    from: 'your@example.com',
+    to: email,
+    subject: 'Eliminación de cuenta por inactividad',
+    text: 'Tu cuenta ha sido eliminada debido a la inactividad. Por favor, contáctanos si deseas recuperarla.'
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({}, 'name email role');
+    res.status(200).json({ status: 'success', data: users });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+};
+
+
+exports.deleteInactiveUsers = async (req, res) => {
+  try {
+    const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+    const inactiveUsers = await User.deleteMany({ last_connection: { $lt: twoDaysAgo } });
+
+    
+    inactiveUsers.forEach(user => {
+      sendInactiveUserEmail(user.email);
+    });
+
+    res.status(200).json({ status: 'success', message: 'Usuarios inactivos eliminados' });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+};
+
 
 const resetPassword = async (req, res, next) => {
   try {
@@ -28,6 +78,7 @@ const resetPassword = async (req, res, next) => {
     return res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
+
 
 const uploadDocuments = async (req, res) => {
   try {
@@ -58,4 +109,6 @@ const uploadDocuments = async (req, res) => {
 module.exports = {
   resetPassword,
   uploadDocuments,
+  getAllUsers,
+  deleteInactiveUsers
 };

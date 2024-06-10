@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administrador</title>
+</head>
+<body>
+  <h1>Panel de Administrador</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Correo Electrónico</th>
+        <th>Rol</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each users}}
+      <tr>
+        <td>{{this.name}}</td>
+        <td>{{this.email}}</td>
+        <td>{{this.role}}</td>
+        <td>
+          <button onclick="editUser('{{this._id}}')">Editar</button>
+          <button onclick="deleteUser('{{this._id}}')">Eliminar</button>
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  <script>
+    function editUser(userId) {
+      
+    }
+
+    function deleteUser(userId) {
+     
+    }
+  </script>
+</body>
+</html>

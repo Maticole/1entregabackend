@@ -1,10 +1,10 @@
 const express = require('express');
-const multer = require('multer');
 const UserController = require('../controllers/userController');
 const authController = require('../controllers/authController');
 
 const router = express.Router();
 
+const multer = require('multer');
 const multerStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     let dest;
@@ -23,11 +23,15 @@ const multerStorage = multer.diskStorage({
 });
 const upload = multer({ storage: multerStorage });
 
+router.use(authController.protect); 
+
+router.get('/', authController.restrictTo('admin'), UserController.getAllUsers);
+
+router.delete('/', authController.restrictTo('admin'), UserController.deleteInactiveUsers);
 
 router.post('/:uid/documents', UserController.updateLastConnection, upload.array('documents'), UserController.uploadDocuments);
 
-router.patch('/api/users/premium/:uid',
-  authController.protect,
+router.patch('/premium/:uid',
   authController.restrictTo('admin'),
   UserController.changeUserRole
 );
