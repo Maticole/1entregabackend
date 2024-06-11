@@ -16,9 +16,9 @@ const swaggerUi = require('swagger-ui-express');
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
-const productManager = new ProductManager('./data/productos.json');
+const productManager = new ProductManager();
 
-const PORT = 8080;
+const PORT = config.port || 8080;
 
 app.use(session({ secret: config.sessionSecret, resave: false, saveUninitialized: false }));
 app.use(passport.initialize());

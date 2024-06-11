@@ -2,16 +2,15 @@ const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
   title: { type: String, required: true },
-  price: { type: Number, required: true }
-
+  price: { type: Number, required: true },
+  category: { type: String, required: false } 
 });
 
-
-//const Product = mongoose.model('Product', productSchema);
+const Product = mongoose.model('Product', productSchema);
 
 class ProductManager {
   constructor() {
-
+    
   }
 
   async addProduct(productData) {
@@ -64,41 +63,7 @@ class ProductManager {
     try {
       let findQuery = {};
       if (query) {
-
-        findQuery = { category: query }
-      }
-      const totalCount = await Product.countDocuments(findQuery);
-      const totalPages = Math.ceil(totalCount / limit);
-      const skip = (page - 1) * limit;
-      let products = await Product.find(findQuery)
-        .limit(limit)
-        .skip(skip);
-      if (sort) {
-        products = products.sort({ price: sort === 'asc' ? 1 : -1 });
-      }
-      return {
-        status: 'success',
-        payload: products,
-        totalPages,
-        prevPage: page > 1 ? page - 1 : null,
-        nextPage: page < totalPages ? page + 1 : null,
-        page,
-        hasPrevPage: page > 1,
-        hasNextPage: page < totalPages,
-        prevLink: page > 1 ? `/api/products?limit=${limit}&page=${page - 1}` : null,
-        nextLink: page < totalPages ? `/api/products?limit=${limit}&page=${page + 1}` : null
-      };
-    } catch (error) {
-      console.error("Error al obtener los productos:", error.message);
-      return { status: 'error', error: "Error interno del servidor" };
-    }
-  }
-  async getProducts({ limit = 10, page = 1, sort, query }) {
-    try {
-      let findQuery = {};
-      if (query) {
-
-        findQuery = { category: query }
+        findQuery = { category: query };
       }
       const totalCount = await Product.countDocuments(findQuery);
       const totalPages = Math.ceil(totalCount / limit);
