@@ -1,4 +1,4 @@
-const User = require('../models/UserModel');
+const User = require('../dao/models/userModel');
 
 class UserRepository {
   constructor(model) {

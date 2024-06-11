@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const User = require('../models/UserModel');
+const User = require('../dao/models/userModel');
 const nodemailer = require('nodemailer');
 
 
