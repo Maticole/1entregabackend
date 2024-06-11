@@ -1,6 +1,6 @@
 const DAOFactory = require('../dao/daoFactory');
-const Product = require('../models/ProductModel');
-const User = require('../models/UserModel');
+const Product = require('../dao/models/ProductSchema');
+const User = require('../dao/models/userModel');
 
 const productManager = DAOFactory.getDAO('fileSystem');
 

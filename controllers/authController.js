@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
-const User = require('../models/UserModel');
-
+const User = require('../dao/models/userModel');
+const UserDTO = require('../dto/dto');
 
 const generateToken = (payload) => {
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
@@ -87,8 +87,37 @@ const updatePassword = async (req, res) => {
   }
 };
 
+const authorizeUser = (req, res, next) => {
+  const token = req.headers['authorization'];
+  if (!token) {
+    return res.status(403).send({ message: 'No token provided.' });
+  }
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(500).send({ message: 'Failed to authenticate token.' });
+    }
+    req.userId = decoded.id;
+    next();
+  });
+};
+
+const getCurrentUserDTO = async (req, res) => {
+  try {
+    const user = req.user; 
+   
+    const userDTO = new UserDTO(user);
+    
+    return res.status(200).json(userDTO);
+  } catch (error) {
+    console.error('Error al obtener el usuario actual:', error);
+    return res.status(500).json({ message: 'Error interno del servidor' });
+  }
+};
+
 module.exports = {
   requestPasswordReset,
   resetPassword,
   updatePassword,
+  authorizeUser,
+  getCurrentUserDTO,
 };

@@ -7,4 +7,11 @@ const errorDictionary = {
     INTERNAL_SERVER_ERROR: 'Error interno del servidor.'
 };
 
-module.exports = { errorDictionary };
+const errorHandler = (fn) => (req, res, next) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
+};
+
+module.exports = {
+  errorDictionary,
+  errorHandler
+};

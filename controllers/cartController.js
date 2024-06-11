@@ -2,7 +2,7 @@ const DAOFactory = require('../dao/daoFactory');
 const cartManager = DAOFactory.getDAO('fileSystem');
 const ProductManager = require('../dao/fileSystem/ProductManager');
 const productManager = new ProductManager();
-const Ticket = require('../models/TicketModel');
+const Ticket = require('../dao/models/TicketModel');
 
 async function addToCart(req, res) {
   try {
