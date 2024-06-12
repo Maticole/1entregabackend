@@ -12,7 +12,7 @@ const cartRouter = require('./routes/cartRouter');
 const authRouter = require('./routes/authRouter');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
-const TicketModel = require('./dao/models/TicketModel');
+const TicketModel = require('./dao/models/ticketModel');
 
 const app = express();
 const server = http.createServer(app);
