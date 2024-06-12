@@ -5,6 +5,7 @@ const socketIO = require('socket.io');
 const mongoose = require('mongoose');
 const passport = require('passport');
 const session = require('express-session');
+const helmet = require('helmet');
 const config = require('./config');
 const ProductManager = require('./dao/fileSystem/ProductManager');
 const productRouter = require('./routes/productRouter');
@@ -20,6 +21,18 @@ const io = socketIO(server);
 const productManager = new ProductManager();
 
 const PORT = config.port || 8080;
+
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'none'"], 
+      fontSrc: ["https://fonts.gstatic.com"],
+      styleSrc: ["'self'", "https://fonts.googleapis.com"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:"],
+    },
+  })
+);
 
 app.use(session({ secret: config.sessionSecret, resave: false, saveUninitialized: false }));
 app.use(passport.initialize());
@@ -38,7 +51,7 @@ const swaggerOptions = {
       description: 'Documentación de la API de Productos y Carrito',
     },
   },
-  apis: ['./routes/productRouter.js', './routes/cartRouter.js'], 
+  apis: ['./routes/productRouter.js', './routes/cartRouter.js'],
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
@@ -78,21 +91,16 @@ io.on('connection', (socket) => {
 
   socket.on('nuevoProducto', async (producto) => {
     await productManager.addProduct(producto);
-    
     io.emit('actualizarProductos', await productManager.getAllProducts());
   });
 });
 
-
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
-  
   if (email === '' || password === '') {
-    
-  res.redirect('/productos');
-} else {
-  
-  res.redirect('/login?error=credencialesInvalidas');
-}
+    res.redirect('/productos');
+  } else {
+    res.redirect('/login?error=credencialesInvalidas');
+  }
 });
