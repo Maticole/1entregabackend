@@ -14,6 +14,7 @@ const authRouter = require('./routes/authRouter');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const TicketModel = require('./dao/models/ticketModel');
+const Cart = require('./dao/models/cartSchema'); 
 
 const app = express();
 const server = http.createServer(app);
@@ -25,9 +26,9 @@ const PORT = config.port || 8080;
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
-      defaultSrc: ["'none'"], 
-      fontSrc: ["https://fonts.gstatic.com"],
-      styleSrc: ["'self'", "https://fonts.googleapis.com"],
+      defaultSrc: ["'none'"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+      styleSrc: ["'self'", "https://fonts.googleapis.com", "'unsafe-inline'"],
       scriptSrc: ["'self'"],
       imgSrc: ["'self'", "data:"],
     },
@@ -50,6 +51,46 @@ const swaggerOptions = {
       version: '1.0.0',
       description: 'Documentación de la API de Productos y Carrito',
     },
+    components: {
+      schemas: {
+        Product: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            description: { type: 'string' },
+            price: { type: 'number' },
+            owner: { type: 'string', format: 'uuid' },
+          },
+          required: ['name', 'description', 'price', 'owner'],
+        },
+        ProductInput: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            description: { type: 'string' },
+            price: { type: 'number' },
+          },
+          required: ['name', 'description', 'price'],
+        },
+        Cart: {
+          type: 'object',
+          properties: {
+            userId: { type: 'string', format: 'uuid' }, 
+            products: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  productId: { type: 'string', format: 'uuid' }, 
+                  quantity: { type: 'number' }, 
+                },
+              },
+            },
+          },
+          required: ['userId', 'products'], 
+        },
+      },
+    },
   },
   apis: ['./routes/productRouter.js', './routes/cartRouter.js'],
 };
@@ -66,16 +107,6 @@ const hbs = expressHandlebars.create({
   extname: '.handlebars',
 });
 
-const expressSession = require('express-session');
-app.use(expressSession({
-  secret: 'miSecreto',
-  resave: false,
-  saveUninitialized: false
-}));
-
-app.use(passport.initialize());
-app.use(passport.session());
-
 app.engine('handlebars', hbs.engine);
 app.set('view engine', 'handlebars');
 
@@ -86,6 +117,15 @@ app.use('/api/products', productRouter);
 app.use('/api/carts', cartRouter);
 app.use('/auth', authRouter);
 
+app.get('/', async (req, res) => {
+  try {
+    const productos = await productManager.getAllProducts(); 
+    res.render('index', { products: productos });
+  } catch (error) {
+    console.error('Error al obtener productos:', error);
+    res.status(500).send('Error interno del servidor');
+  }
+});
 io.on('connection', (socket) => {
   console.log('Nuevo cliente conectado');
 
