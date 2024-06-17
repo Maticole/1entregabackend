@@ -4,15 +4,34 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lista de Productos</title>
+  <link rel="stylesheet" href="/css/styles.css"> 
 </head>
 <body>
-  <h1>Lista de Productos</h1>
-  <ul>
-    {{#each products}}
-      <li>{{this}}</li>
-    {{/each}}
-  </ul>
-
-  <script src="../public/js/socketScript.js"></script>
+  <header>
+    <h1>Lista de Productos</h1>
+    <nav>
+      <ul>
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/cart">Carrito</a></li>
+        <li><a href="/login">Login</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <ul>
+      {{#each products}}
+        <li>
+          <h2>{{this.name}}</h2>
+          <p>{{this.description}}</p>
+          <p>Precio: {{this.price}}</p>
+        </li>
+      {{/each}}
+    </ul>
+  </main>
+  <footer>
+    <p>&copy; EcommerceMati</p>
+  </footer>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/socketScript.js"></script>
 </body>
 </html>

@@ -3,14 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Carrito de Compras</title>
+  <title>Carrito</title>
+  <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-  <h1>Carrito de Compras</h1>
-  <ul>
-    {{#each products}}
-      <li>{{this}}</li> 
-    {{/each}}
-  </ul>
+  <header>
+    <h1>Carrito de Compras</h1>
+    <nav>
+      <ul>
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/cart">Carrito</a></li>
+        <li><a href="/login">Login</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <ul>
+      {{#each cart.products}}
+        <li>
+          <h2>{{this.product.name}}</h2>
+          <p>Cantidad: {{this.quantity}}</p>
+          <p>Precio: {{this.product.price}}</p>
+        </li>
+      {{/each}}
+    </ul>
+    <p>Total: {{cart.totalPrice}}</p>
+  </main>
+  <footer>
+    <p>&copy; EcommerceMati</p>
+  </footer>
 </body>
 </html>

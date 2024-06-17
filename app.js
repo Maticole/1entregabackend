@@ -30,8 +30,9 @@ app.use(
       defaultSrc: ["'none'"],
       fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
       styleSrc: ["'self'", "https://fonts.googleapis.com", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "/socket.io/socket.io.js"],
       imgSrc: ["'self'", "data:"],
+      connectSrc: ["'self'", "ws:"], 
     },
   })
 );
@@ -40,7 +41,7 @@ app.use(session({ secret: config.sessionSecret, resave: false, saveUninitialized
 app.use(passport.initialize());
 app.use(passport.session());
 
-mongoose.connect(config.mongodbURI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(config.mongodbURI)
   .then(() => console.log('Conexión a MongoDB Atlas establecida'))
   .catch(err => console.error('Error al conectar a MongoDB Atlas:', err));
 
@@ -113,7 +114,7 @@ app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api/products', productRouter);
 app.use('/api/carts', cartRouter);
