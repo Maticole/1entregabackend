@@ -51,13 +51,15 @@ proyecto/
 │ ├── mockingModule.js
 │ ├── passportConfig.js
 │ └── uploadFile.js
-├── views/
-│ ├── admin.handlebars
-│ ├── cart.handlebars
-│ ├── index.handlebars
-│ ├── login.handlebars
-│ ├── products.handlebars
-│ └── realTimeProducts.handlebars
+├── views
+│   │  ├── layouts
+│   │   └── main.handlebars
+│   ├── admin.handlebars
+│   ├── cart.handlebars
+│   ├── index.handlebars
+│   ├── login.handlebars
+│   ├── products.handlebars
+│   └── realTimeProducts.handlebars
 ├── .env
 ├── .gitignore
 ├── app.js

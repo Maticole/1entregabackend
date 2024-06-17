@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 const session = require('express-session');
 const helmet = require('helmet');
+const path = require('path');
 const config = require('./config');
 const ProductManager = require('./dao/fileSystem/ProductManager');
 const productRouter = require('./routes/productRouter');
@@ -109,6 +110,7 @@ const hbs = expressHandlebars.create({
 
 app.engine('handlebars', hbs.engine);
 app.set('view engine', 'handlebars');
+app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.json());
 app.use(express.static('public'));
@@ -144,3 +146,4 @@ app.post('/login', async (req, res) => {
     res.redirect('/login?error=credencialesInvalidas');
   }
 });
+
