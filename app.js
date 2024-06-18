@@ -42,8 +42,8 @@ app.use(
 );
 
 mongoose.connect(config.mongodbURI, {
-  //useNewUrlParser: true,
-  //useUnifiedTopology: true,
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
   serverSelectionTimeoutMS: 10000
 })
   .then(() => {
@@ -55,7 +55,7 @@ mongoose.connect(config.mongodbURI, {
       resave: false,
       saveUninitialized: false,
       store: MongoStore.create({
-        mongoUrl: config.mongodbURI,
+        mongoUrl: config.mongodbURI
       })
     };
 
