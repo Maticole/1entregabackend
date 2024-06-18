@@ -42,9 +42,21 @@ app.use(session({ secret: config.sessionSecret, resave: false, saveUninitialized
 app.use(passport.initialize());
 app.use(passport.session());
 
-mongoose.connect(config.mongodbURI)
+mongoose.connect(config.mongodbURI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 10000
+})
   .then(() => console.log('Conexión a MongoDB Atlas establecida'))
   .catch(err => console.error('Error al conectar a MongoDB Atlas:', err));
+
+  mongoose.connection.on('error', err => {
+    console.error('Error en la conexión a MongoDB:', err.message);
+  });
+  
+  mongoose.connection.on('disconnected', () => {
+    console.log('Desconectado de MongoDB');
+  });
 
 const swaggerOptions = {
   definition: {
@@ -101,8 +113,8 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-server.listen(config.port, () => {
-  console.log(`Servidor Express iniciado en el puerto ${config.port}`);
+server.listen(PORT, () => {
+  console.log(`Servidor Express iniciado en el puerto ${PORT}`);
 });
 
 const hbs = expressHandlebars.create({
