@@ -3,7 +3,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcryptjs');
 const User = require('../dao/models/userModel');
 
-passport.use('local', new LocalStrategy({
+passport.use(new LocalStrategy({
     usernameField: 'email'
   },
   async (email, password, done) => {

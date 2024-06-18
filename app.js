@@ -3,7 +3,7 @@ const expressHandlebars = require('express-handlebars');
 const http = require('http');
 const socketIO = require('socket.io');
 const mongoose = require('mongoose');
-const passport = require('passport');
+const passport = require('./utils/passportConfig');
 const session = require('express-session');
 const helmet = require('helmet');
 const path = require('path');
@@ -16,6 +16,7 @@ const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const TicketModel = require('./dao/models/ticketModel');
 const Cart = require('./dao/models/cartSchema'); 
+const cartController = require('./controllers/cartController');
 
 const app = express();
 const server = http.createServer(app);
@@ -107,6 +108,11 @@ server.listen(config.port, () => {
 const hbs = expressHandlebars.create({
   defaultLayout: 'main',
   extname: '.handlebars',
+  
+  runtimeOptions: {
+    allowProtoPropertiesByDefault: true,
+    allowProtoMethodsByDefault: true,
+  }
 });
 
 app.engine('handlebars', hbs.engine);
@@ -129,13 +135,9 @@ app.get('/', async (req, res) => {
     res.status(500).send('Error interno del servidor');
   }
 });
-io.on('connection', (socket) => {
-  console.log('Nuevo cliente conectado');
 
-  socket.on('nuevoProducto', async (producto) => {
-    await productManager.addProduct(producto);
-    io.emit('actualizarProductos', await productManager.getAllProducts());
-  });
+app.get('/login', (req, res) => {
+  res.render('login');
 });
 
 app.post('/login', async (req, res) => {
@@ -146,5 +148,27 @@ app.post('/login', async (req, res) => {
   } else {
     res.redirect('/login?error=credencialesInvalidas');
   }
+});
+
+app.post('/agregar-al-carrito', cartController.addToCart);
+
+
+app.get('/ver-carrito', async (req, res) => {
+  try {
+    const cart = await cartController.getAllCarts();
+    res.render('cart', { cart });
+  } catch (error) {
+    console.error('Error al obtener el carrito:', error);
+    res.status(500).send('Error interno del servidor');
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log('Nuevo cliente conectado');
+
+  socket.on('nuevoProducto', async (producto) => {
+    await productManager.addProduct(producto);
+    io.emit('actualizarProductos', await productManager.getAllProducts());
+  });
 });
 

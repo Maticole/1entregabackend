@@ -11,11 +11,16 @@ const generateToken = (payload) => {
 
 const sendPasswordResetEmail = async (email, token) => {
   const transporter = nodemailer.createTransport({
+    service: 'gmail', 
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
 
   });
 
   const mailOptions = {
-    from: 'your@example.com',
+    from: process.env.EMAIL_USER,
     to: email,
     subject: 'Recuperación de contraseña',
     text: `Haga clic en el siguiente enlace para restablecer su contraseña: ${process.env.CLIENT_URL}/reset-password/${token}`,
