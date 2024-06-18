@@ -54,9 +54,7 @@ mongoose.connect(config.mongodbURI, {
       secret: config.sessionSecret,
       resave: false,
       saveUninitialized: false,
-      store: MongoStore.create({
-        mongoUrl: config.mongodbURI
-      })
+      store: MongoStore.create({ mongoUrl: config.mongodbURI })
     };
 
     app.use(session(sessionOptions));
@@ -197,5 +195,8 @@ mongoose.connect(config.mongodbURI, {
     });
 
   })
-  .catch(err => console.error('Error al conectar a MongoDB Atlas:', err));
+  .catch(err => {
+    console.error('Error al conectar a MongoDB Atlas:', err);
+    process.exit(1);
+  });
 
