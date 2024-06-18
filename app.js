@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const expressHandlebars = require('express-handlebars');
 const http = require('http');
@@ -38,7 +40,12 @@ app.use(
   })
 );
 
-app.use(session({ secret: config.sessionSecret, resave: false, saveUninitialized: false }));
+app.use(session({
+  secret: config.sessionSecret,
+  resave: false,
+  saveUninitialized: false,
+  store: new (require('connect-mongo'))({ mongoUrl: process.env.MONGO_URI })
+}));
 app.use(passport.initialize());
 app.use(passport.session());
 
