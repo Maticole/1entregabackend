@@ -12,6 +12,7 @@ const helmet = require('helmet');
 const path = require('path');
 const config = require('./config');
 const ProductManager = require('./dao/fileSystem/ProductManager');
+const { authorizeUser } = require('./utils/authMiddleware');
 const productRouter = require('./routes/productRouter');
 const cartRouter = require('./routes/cartRouter');
 const authRouter = require('./routes/authRouter');
@@ -20,6 +21,9 @@ const swaggerUi = require('swagger-ui-express');
 const TicketModel = require('./dao/models/ticketModel');
 const Cart = require('./dao/models/cartSchema');
 const cartController = require('./controllers/cartController');
+const bodyParser = require('body-parser');
+const handlebarsLayouts = require('handlebars-layouts');
+const handlebars = require('handlebars');
 
 const app = express();
 const server = http.createServer(app);
@@ -28,13 +32,23 @@ const productManager = new ProductManager();
 
 const PORT = config.port || 8080;
 
+function isAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/login');
+}
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
-      defaultSrc: ["'none'"],
+      defaultSrc: ["'self'"],
       fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
       styleSrc: ["'self'", "https://fonts.googleapis.com", "'unsafe-inline'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "/socket.io/socket.io.js"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "http://localhost:8080/socket.io/socket.io.js"],
       imgSrc: ["'self'", "data:"],
       connectSrc: ["'self'", "ws:"],
     },
@@ -57,6 +71,7 @@ mongoose.connect(config.mongodbURI, {
       store: MongoStore.create({ mongoUrl: config.mongodbURI })
     };
 
+    
     app.use(session(sessionOptions));
     app.use(passport.initialize());
     app.use(passport.session());
@@ -117,15 +132,25 @@ mongoose.connect(config.mongodbURI, {
     const swaggerDocs = swaggerJsdoc(swaggerOptions);
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
+    handlebarsLayouts.register(handlebars);
 
     const hbs = expressHandlebars.create({
       defaultLayout: 'main',
       extname: '.handlebars',
+      layoutsDir: path.join(__dirname, 'views', 'layouts'),
+      partialsDir: path.join(__dirname, 'views', 'partials'),
+      helpers: {
+        extend: handlebarsLayouts.extend,
+        embed: handlebarsLayouts.embed,
+        
+      },
       runtimeOptions: {
         allowProtoPropertiesByDefault: true,
         allowProtoMethodsByDefault: true,
       },
     });
+
+   
 
     app.engine('handlebars', hbs.engine);
     app.set('view engine', 'handlebars');
@@ -141,7 +166,7 @@ mongoose.connect(config.mongodbURI, {
     app.use('/auth', authRouter);
 
 
-    app.get('/', async (req, res) => {
+    app.get('/', isAuthenticated, authorizeUser(['user', 'premium', 'admin']), async (req, res) => {
       try {
         const productos = await productManager.getAllProducts();
         res.render('index', { products: productos });
@@ -151,52 +176,43 @@ mongoose.connect(config.mongodbURI, {
       }
     });
 
+    app.get('/cart', isAuthenticated, authorizeUser(['user', 'premium', 'admin']), async (req, res) => {
+      try {
+        const cart = await Cart.findOne({ userId: req.user.id }).populate('products.productId');
+        res.render('cart', { cart });
+      } catch (error) {
+        console.error('Error al obtener carrito:', error);
+        res.status(500).send('Error interno del servidor');
+      }
+    });
 
     app.get('/login', (req, res) => {
       res.render('login');
     });
 
-    app.post('/login', async (req, res) => {
-      const { email, password } = req.body;
+    app.post('/login', passport.authenticate('local', {
+      successRedirect: '/',
+      failureRedirect: '/login',
+      failureFlash: true
+    }));
 
-      if (email === '' || password === '') {
-        res.redirect('/productos');
-      } else {
-        res.redirect('/login?error=credencialesInvalidas');
-      }
-    });
-
-
-    app.post('/agregar-al-carrito', cartController.addToCart);
-
-
-    app.get('/ver-carrito', async (req, res) => {
-      try {
-        const cart = await cartController.getAllCarts();
-        res.render('cart', { cart });
-      } catch (error) {
-        console.error('Error al obtener el carrito:', error);
-        res.status(500).send('Error interno del servidor');
-      }
+    app.get('/register', (req, res) => {
+      res.render('register');
     });
 
     io.on('connection', (socket) => {
       console.log('Nuevo cliente conectado');
 
-      socket.on('nuevoProducto', async (producto) => {
-        await productManager.addProduct(producto);
-        io.emit('actualizarProductos', await productManager.getAllProducts());
+      socket.on('disconnect', () => {
+        console.log('Cliente desconectado');
       });
     });
-
 
     server.listen(PORT, () => {
       console.log(`Servidor Express iniciado en el puerto ${PORT}`);
     });
-
   })
   .catch(err => {
     console.error('Error al conectar a MongoDB Atlas:', err);
-    process.exit(1);
   });
 

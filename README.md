@@ -59,7 +59,8 @@ proyecto/
 │   ├── index.handlebars
 │   ├── login.handlebars
 │   ├── products.handlebars
-│   └── realTimeProducts.handlebars
+│   ├── realTimeProducts.handlebars
+│   └── register.handlebars
 ├── .env
 ├── .gitignore
 ├── app.js
@@ -68,7 +69,9 @@ proyecto/
 ├── multerConfig.js
 ├── package-lock.json
 ├── package.json
-└── README.md
+├── README.md
+├── seeProducts.js
+└── seedUser.js
 
 
 ## Configuración del Entorno
@@ -108,7 +111,7 @@ npm test
 
 Documentación de la API
 La documentación de la API se genera automáticamente con Swagger. Para acceder a ella, inicia el servidor y navega a:
-http://localhost:8080/api-docs
+http://localhost:8080
 
 Estructura de Carpetas y Archivos
 Controllers

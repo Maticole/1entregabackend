@@ -1,25 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lista de Productos</title>
-  <link rel="stylesheet" href="/css/styles.css"> 
-  </head>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+
 <body>
+  {{#extend "main"}}
+  {{#content "body"}}
   <header>
     <h1>Lista de Productos</h1>
     <nav>
       <ul>
         <li><a href="/">Inicio</a></li>
         <li><a href="/cart">Carrito</a></li>
-        <li><a href="/login">Login</a></li>
+        {{#if user}}
+
+        {{#if user.role '===' 'admin'}}
+        <li><a href="/admin">Administrar Productos</a></li>
+        {{/if}}
+        <li><a href="/logout">Cerrar Sesión</a></li>
+        {{else}}
+        <li><a href="/login">Iniciar Sesión</a></li>
+        {{/if}}
       </ul>
     </nav>
   </header>
   <main>
     <ul>
-    {{#each products}}
+      {{#each products}}
       <li>
         <span>{{this.name}}</span>
         <span>{{this.description}}</span>
@@ -30,13 +42,17 @@
           <button type="submit">Agregar al carrito</button>
         </form>
       </li>
-    {{/each}}
-  </ul>
+      {{/each}}
+    </ul>
   </main>
   <footer>
     <p>&copy; EcommerceMati</p>
   </footer>
+  {{/content}}
+  {{/extend}}
+
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/socketScript.js"></script>
 </body>
+
 </html>

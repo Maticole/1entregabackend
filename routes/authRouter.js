@@ -6,10 +6,26 @@ const authController = require('../controllers/authController');
 
 const authRouter = express.Router();
 
-authRouter.post('/login', passport.authenticate('local', {
-  successRedirect: '/',
-  failureRedirect: '/login?error=true'
-}));
+authRouter.post('/login', (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    if (err) {
+      console.error('Error en autenticación:', err);
+      return next(err);
+    }
+    if (!user) {
+      console.log('Fallo de autenticación:', info.message);
+      return res.redirect('/login?error=true');
+    }
+    req.logIn(user, (err) => {
+      if (err) {
+        console.error('Error al iniciar sesión:', err);
+        return next(err);
+      }
+      console.log('Autenticación exitosa:', user);
+      return res.redirect('/');
+    });
+  })(req, res, next);
+});
 
 authRouter.post('/register', async (req, res) => {
   const { email, password, username } = req.body;

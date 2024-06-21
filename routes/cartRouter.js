@@ -1,5 +1,6 @@
 const express = require('express');
 const cartController = require('../controllers/cartController');
+const { authorizeUser } = require('../utils/authMiddleware');
 const authController = require('../controllers/authController');
 const cartRouter = express.Router();
 const { errorHandler } = require('../utils/errorHandler');
@@ -29,7 +30,7 @@ const { errorHandler } = require('../utils/errorHandler');
  *       '500':
  *         description: Error interno del servidor.
  */
-cartRouter.get('/:cid', authController.authorizeUser, errorHandler(cartController.getCart));
+cartRouter.get('/:cid', authorizeUser(['user', 'admin', 'premium']), errorHandler(cartController.getCart));
 
 /**
  * @swagger
@@ -60,7 +61,7 @@ cartRouter.get('/:cid', authController.authorizeUser, errorHandler(cartControlle
  *       '500':
  *         description: Error interno del servidor.
  */
-cartRouter.post('/:cid/add/:pid', authController.authorizeUser, errorHandler(cartController.addToCart));
+cartRouter.post('/:cid/add/:pid', authorizeUser(['user', 'admin', 'premium']), errorHandler(cartController.addToCart));
 
 /**
  * @swagger
@@ -91,7 +92,7 @@ cartRouter.post('/:cid/add/:pid', authController.authorizeUser, errorHandler(car
  *       '500':
  *         description: Error interno del servidor.
  */
-cartRouter.delete('/:cid/remove/:pid', authController.authorizeUser, errorHandler(cartController.removeFromCart));
+cartRouter.delete('/:cid/remove/:pid', authorizeUser(['user', 'admin', 'premium']), errorHandler(cartController.removeFromCart));
 
 /**
  * @swagger
@@ -116,6 +117,6 @@ cartRouter.delete('/:cid/remove/:pid', authController.authorizeUser, errorHandle
  *       '500':
  *         description: Error interno del servidor.
  */
-cartRouter.post('/:cid/purchase', authController.authorizeUser, errorHandler(cartController.purchaseCart));
+cartRouter.post('/:cid/purchase', authorizeUser(['user', 'admin', 'premium']), errorHandler(cartController.purchaseCart));
 
 module.exports = cartRouter;

@@ -1,5 +1,6 @@
 const express = require('express');
 const productController = require('../controllers/productController');
+const { authorizeUser } = require('../utils/authMiddleware');
 const authController = require('../controllers/authController');
 const productRouter = express.Router();
 const mockingModule = require('../utils/mockingModule');
@@ -66,7 +67,7 @@ productRouter.get('/', errorHandler(productController.getProducts));
  *       '500':
  *         description: Error interno del servidor.
  */
-productRouter.post('/', authController.authorizeUser, errorHandler(productController.addProduct));
+productRouter.post('/', authorizeUser(['admin', 'premium']), errorHandler(productController.addProduct));
 
 /**
  * @swagger
@@ -125,7 +126,7 @@ productRouter.get('/:id', errorHandler(productController.getProductById));
  *       '500':
  *         description: Error interno del servidor.
  */
-productRouter.put('/:id', authController.authorizeUser, errorHandler(productController.updateProduct));
+productRouter.put('/:id', authorizeUser(['admin', 'premium']), errorHandler(productController.updateProduct));
 
 /**
  * @swagger
@@ -152,6 +153,6 @@ productRouter.put('/:id', authController.authorizeUser, errorHandler(productCont
  *       '500':
  *         description: Error interno del servidor.
  */
-productRouter.delete('/:id', authController.authorizeUser, errorHandler(productController.deleteProduct));
+productRouter.delete('/:id', authorizeUser(['admin', 'premium']), errorHandler(productController.deleteProduct));
 
 module.exports = productRouter;
