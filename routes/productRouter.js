@@ -53,10 +53,10 @@ productRouter.get('/', errorHandler(productController.getProducts));
  *   post:
  *     summary: Agrega un nuevo producto.
  *     description: Crea un nuevo producto en la base de datos.
- *     parameters:
- *       - in: body
- *         name: productData
- *         required: true
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
  *         schema:
  *           $ref: '#/components/schemas/ProductInput'
  *     security:

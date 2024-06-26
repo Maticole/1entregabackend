@@ -1,43 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Administrador</title>
+  <title>Admin - Lista de Productos</title>
+  <link rel="stylesheet" href="/css/styles.css">
 </head>
-<body>
-  <h1>Panel de Administrador</h1>
-  <table>
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Correo Electrónico</th>
-        <th>Rol</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      {{#each users}}
-      <tr>
-        <td>{{this.name}}</td>
-        <td>{{this.email}}</td>
-        <td>{{this.role}}</td>
-        <td>
-          <button onclick="editUser('{{this._id}}')">Editar</button>
-          <button onclick="deleteUser('{{this._id}}')">Eliminar</button>
-        </td>
-      </tr>
-      {{/each}}
-    </tbody>
-  </table>
-  <script>
-    function editUser(userId) {
-      
-    }
 
-    function deleteUser(userId) {
-     
-    }
-  </script>
+<body>
+  <header>
+    <h1>Admin - Lista de Productos</h1>
+    <nav>
+      <ul>
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/cart">Carrito</a></li>
+        <li><a href="/admin">Administrar Productos</a></li>
+        <li><a href="/logout">Cerrar Sesión</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <ul>
+      {{#each products}}
+        <li>
+          <span>{{this.name}}</span>
+          <span>{{this.description}}</span>
+          <span>${{this.price}}</span>
+          <form action="/api/carts" method="POST">
+            <input type="hidden" name="productId" value="{{this._id}}">
+            <input type="number" name="quantity" value="1" min="1" max="10">
+            <button type="submit">Agregar al carrito</button>
+          </form>
+        </li>
+      {{/each}}
+    </ul>
+  </main>
+  <footer>
+    <p>&copy; EcommerceMati</p>
+  </footer>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/socketScript.js"></script>
 </body>
+
 </html>

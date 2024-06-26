@@ -1,52 +1,18 @@
 const express = require('express');
 const cartController = require('../controllers/cartController');
 const { authorizeUser } = require('../utils/authMiddleware');
-const authController = require('../controllers/authController');
 const cartRouter = express.Router();
 const { errorHandler } = require('../utils/errorHandler');
 
 /**
  * @swagger
- * /api/carts/{cid}:
- *   get:
- *     summary: Obtiene el carrito de un usuario.
- *     description: Retorna el carrito de compras de un usuario específico.
- *     parameters:
- *       - in: path
- *         name: cid
- *         required: true
- *         schema:
- *           type: string
- *         description: ID del carrito de compras a obtener.
- *     responses:
- *       '200':
- *         description: Carrito de compras obtenido con éxito.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Cart'
- *       '404':
- *         description: Carrito de compras no encontrado.
- *       '500':
- *         description: Error interno del servidor.
- */
-cartRouter.get('/:cid', authorizeUser(['user', 'admin', 'premium']), errorHandler(cartController.getCart));
-
-/**
- * @swagger
- * /api/carts/{cid}/add/{pid}:
+ * /api/carts:
  *   post:
  *     summary: Agrega un producto al carrito.
  *     description: Agrega un producto específico al carrito de compras de un usuario.
  *     parameters:
- *       - in: path
- *         name: cid
- *         required: true
- *         schema:
- *           type: string
- *         description: ID del carrito de compras al que se agregará el producto.
- *       - in: path
- *         name: pid
+ *       - in: body
+ *         name: productId
  *         required: true
  *         schema:
  *           type: string
@@ -57,11 +23,11 @@ cartRouter.get('/:cid', authorizeUser(['user', 'admin', 'premium']), errorHandle
  *       '200':
  *         description: Producto agregado al carrito exitosamente.
  *       '404':
- *         description: Carrito de compras o producto no encontrado.
+ *         description: Producto no encontrado.
  *       '500':
  *         description: Error interno del servidor.
  */
-cartRouter.post('/:cid/add/:pid', authorizeUser(['user', 'admin', 'premium']), errorHandler(cartController.addToCart));
+cartRouter.post('/', authorizeUser(['user', 'admin', 'premium']), errorHandler(cartController.addToCart));
 
 /**
  * @swagger

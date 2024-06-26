@@ -19,16 +19,20 @@
   </header>
   <main>
     <ul>
-    {{#each cart}}
+    {{#each cart.products}}
       <li>
         <span>{{this.productId.name}}</span>
         <span>Cantidad: {{this.quantity}}</span>
-        <form action="/eliminar-del-carrito/{{this.productId._id}}" method="POST">
+        <form action="/api/carts/{{../cart._id}}/remove/{{this.productId._id}}" method="POST">
           <button type="submit">Eliminar</button>
         </form>
       </li>
     {{/each}}
-  </ul>
+    </ul>
+    <form action="/api/carts" method="POST">
+      <input type="hidden" name="productId" value="{{this._id}}">
+      <button type="submit">Agregar al Carrito</button>
+    </form>
     <p>Total: {{cart.totalPrice}}</p>
   </main>
   <footer>

@@ -31,6 +31,10 @@ class ProductManager {
 
   async getProductById(id) {
     try {
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        console.error("ID de producto no válido:", id);
+        return null;
+      }
       return await Product.findById(id);
     } catch (error) {
       console.error("Error al obtener el producto por ID:", error.message);

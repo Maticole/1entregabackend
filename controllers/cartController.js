@@ -7,18 +7,31 @@ const Ticket = require('../dao/models/ticketModel');
 async function addToCart(req, res) {
   try {
     const { productId } = req.body;
+    const userId = req.user._id;
 
-  
+    console.log('Request Body:', req.body);
+    console.log('Product ID:', productId);  
+    console.log('User ID:', userId);        
+
+    if (!productId) {
+      return res.status(400).json({ error: 'Product ID is required' });
+    }
+
     const isPremium = req.user.role === 'premium';
-  
+
     const product = await productManager.getProductById(productId);
+    if (!product) {
+      return res.status(404).json({ error: 'Producto no encontrado' });
+    }
+
     if (isPremium && product.owner.equals(req.user._id)) {
       return res.status(403).json({ error: 'No puedes agregar tu propio producto al carrito' });
     }
-    
+
     const cart = await cartManager.addToCart(req.user._id, productId);
     return res.status(200).json(cart);
   } catch (error) {
+    console.error('Error al agregar producto al carrito:', error);
     return res.status(500).json({ error: error.message });
   }
 }

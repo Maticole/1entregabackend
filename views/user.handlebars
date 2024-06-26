@@ -4,25 +4,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lista de Productos</title>
+  <title>User - Lista de Productos</title>
   <link rel="stylesheet" href="/css/styles.css">
 </head>
 
 <body>
   <header>
-    <h1>Lista de Productos</h1>
+    <h1>User - Lista de Productos</h1>
     <nav>
       <ul>
         <li><a href="/">Inicio</a></li>
         <li><a href="/cart">Carrito</a></li>
-        {{#if user}}
-          {{#if (eq user.role 'admin')}}
-            <li><a href="/admin">Administrar Productos</a></li>
-          {{/if}}
-          <li><a href="/logout">Cerrar Sesión</a></li>
-        {{else}}
-          <li><a href="/login">Iniciar Sesión</a></li>
-        {{/if}}
+        <li><a href="/logout">Cerrar Sesión</a></li>
       </ul>
     </nav>
   </header>
@@ -34,7 +27,7 @@
           <span>{{this.description}}</span>
           <span>${{this.price}}</span>
           <form action="/api/carts" method="POST">
-             <input type="hidden" name="productId" value="{{productId}}">
+            <input type="hidden" name="productId" value="{{productId}}">
             <input type="number" name="quantity" value="1" min="1" max="10">
             <button type="submit">Agregar al carrito</button>
           </form>
@@ -48,14 +41,6 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/socketScript.js"></script>
-  <script>
-    document.querySelectorAll('.add-to-cart-form').forEach(form => {
-      form.addEventListener('submit', function(event) {
-        const productId = form.querySelector('input[name="productId"]').value;
-        console.log('Product ID from form:', productId);
-      });
-    });
-  </script>
 </body>
 
 </html>

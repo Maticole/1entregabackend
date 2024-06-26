@@ -22,8 +22,11 @@ const TicketModel = require('./dao/models/ticketModel');
 const Cart = require('./dao/models/cartSchema');
 const cartController = require('./controllers/cartController');
 const bodyParser = require('body-parser');
-const handlebarsLayouts = require('handlebars-layouts');
-const handlebars = require('handlebars');
+const flash = require('connect-flash');
+const bcrypt = require('bcrypt');
+const User = require('./dao/models/userModel');
+const methodOverride = require('method-override');
+
 
 const app = express();
 const server = http.createServer(app);
@@ -39,8 +42,20 @@ function isAuthenticated(req, res, next) {
   res.redirect('/login');
 }
 
+function redirectBasedOnRole(req, res) {
+  const role = req.user.role;
+  if (role === 'admin') {
+    return res.redirect('/admin');
+  } else if (role === 'premium') {
+    return res.redirect('/premium');
+  } else {
+    return res.redirect('/user');
+  }
+}
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(methodOverride('_method'));
 
 app.use(
   helmet.contentSecurityPolicy({
@@ -75,6 +90,13 @@ mongoose.connect(config.mongodbURI, {
     app.use(session(sessionOptions));
     app.use(passport.initialize());
     app.use(passport.session());
+
+    app.use(flash());
+    app.use((req, res, next) => {
+      res.locals.successMessages = req.flash('success');
+      res.locals.errorMessages = req.flash('error');
+      next();
+    });
 
 
     const swaggerOptions = {
@@ -132,27 +154,24 @@ mongoose.connect(config.mongodbURI, {
     const swaggerDocs = swaggerJsdoc(swaggerOptions);
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-    handlebarsLayouts.register(handlebars);
+    
 
-    const hbs = expressHandlebars.create({
-      defaultLayout: 'main',
-      extname: '.handlebars',
-      layoutsDir: path.join(__dirname, 'views', 'layouts'),
-      partialsDir: path.join(__dirname, 'views', 'partials'),
-      helpers: {
-        extend: handlebarsLayouts.extend,
-        embed: handlebarsLayouts.embed,
-        
-      },
-      runtimeOptions: {
-        allowProtoPropertiesByDefault: true,
-        allowProtoMethodsByDefault: true,
-      },
-    });
+     const hbs = expressHandlebars.create({
+       defaultLayout: null,
+       extname: '.handlebars',
+       partialsDir: path.join(__dirname, 'views', 'partials'),
+       runtimeOptions: {
+         allowProtoPropertiesByDefault: true,
+         allowProtoMethodsByDefault: true,
+       },
 
+       helpers: {
+        eq: (a, b) => a === b,
+      },
+     });
    
 
-    app.engine('handlebars', hbs.engine);
+     app.engine('handlebars', hbs.engine);
     app.set('view engine', 'handlebars');
     app.set('views', path.join(__dirname, 'views'));
 
@@ -165,11 +184,34 @@ mongoose.connect(config.mongodbURI, {
     app.use('/api/carts', cartRouter);
     app.use('/auth', authRouter);
 
+    app.get('/', isAuthenticated, (req, res) => {
+      redirectBasedOnRole(req, res);
+    });
 
-    app.get('/', isAuthenticated, authorizeUser(['user', 'premium', 'admin']), async (req, res) => {
+    app.get('/admin', isAuthenticated, authorizeUser(['admin']), async (req, res) => {
       try {
         const productos = await productManager.getAllProducts();
-        res.render('index', { products: productos });
+        res.render('admin', { products: productos, user: req.user });
+      } catch (error) {
+        console.error('Error al obtener productos:', error);
+        res.status(500).send('Error interno del servidor');
+      }
+    });
+
+    app.get('/premium', isAuthenticated, authorizeUser(['premium']), async (req, res) => {
+      try {
+        const productos = await productManager.getAllProducts();
+        res.render('premium', { products: productos, user: req.user });
+      } catch (error) {
+        console.error('Error al obtener productos:', error);
+        res.status(500).send('Error interno del servidor');
+      }
+    });
+
+    app.get('/user', isAuthenticated, authorizeUser(['user']), async (req, res) => {
+      try {
+        const productos = await productManager.getAllProducts();
+        res.render('user', { products: productos, user: req.user });
       } catch (error) {
         console.error('Error al obtener productos:', error);
         res.status(500).send('Error interno del servidor');
@@ -191,13 +233,47 @@ mongoose.connect(config.mongodbURI, {
     });
 
     app.post('/login', passport.authenticate('local', {
-      successRedirect: '/',
       failureRedirect: '/login',
       failureFlash: true
-    }));
+    }), (req, res) => {
+      redirectBasedOnRole(req, res);
+    });
 
     app.get('/register', (req, res) => {
       res.render('register');
+    });
+
+    app.post('/register', async (req, res) => {
+      const { email, password, username } = req.body;
+      try {
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+          req.flash('error', 'El email ya está registrado.');
+          return res.redirect('/register');
+        }
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new User({ email, password: hashedPassword, username });
+        await newUser.save();
+        req.flash('success', 'Registro exitoso, por favor inicie sesión');
+        res.redirect('/login');
+      } catch (error) {
+        console.error('Error al registrar usuario:', error);
+        req.flash('error', 'Error al registrar usuario');
+        res.redirect('/register');
+      }
+    });
+
+    app.get('/logout', (req, res, next) => {
+      req.logout((err) => {
+        if (err) { return next(err); }
+        req.session.destroy((err) => {
+          if (err) {
+            console.error('Error destroying session:', err);
+          }
+          res.clearCookie('connect.sid');
+          res.redirect('/login');
+        });
+      });
     });
 
     io.on('connection', (socket) => {
