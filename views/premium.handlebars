@@ -27,7 +27,7 @@
           <span>{{this.description}}</span>
           <span>${{this.price}}</span>
           <form action="/api/carts" method="POST">
-            <input type="hidden" name="productId" value="{{productId}}">
+            <input type="hidden" name="productId" value="{{this.id}}">
             <input type="number" name="quantity" value="1" min="1" max="10">
             <button type="submit">Agregar al carrito</button>
           </form>

@@ -46,7 +46,7 @@ async function getAllCarts(req, res) {
   }
 }
 
-async function removeProductFromCart(req, res) {
+async function removeFromCart(req, res) {
   const { cid, pid } = req.params;
   try {
     const cart = await cartManager.getCartById(cid);
@@ -93,9 +93,39 @@ async function purchaseCart(req, res) {
   }
 }
 
+async function viewCart(req, res) {
+  try {
+    const cart = await cartManager.getCartByUserId(req.user._id); 
+    res.render('cart', { cart }); 
+  } catch (error) {
+    console.error("Error al obtener el carrito:", error.message);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+}
+
+async function addMultipleToCart(req, res) {
+  try {
+    const products = req.body.products; 
+    const userId = req.user._id;
+
+    for (const [productId, quantity] of Object.entries(products)) {
+      for (let i = 0; i < quantity; i++) {
+        await cartManager.addToCart(userId, productId);
+      }
+    }
+
+    res.redirect('/api/carts/view');
+  } catch (error) {
+    console.error('Error al agregar productos al carrito:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+}
+
 module.exports = {
   addToCart,
   getAllCarts,
-  removeProductFromCart,
+  removeFromCart,
   purchaseCart,
+  viewCart,
+  addMultipleToCart 
 };

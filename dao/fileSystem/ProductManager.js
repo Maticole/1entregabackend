@@ -16,9 +16,10 @@ class ProductManager {
 
   async getAllProducts() {
     try {
-      const product = await Product.find();
-      console.log('Productos obtenidos desde la base de datos:', product); 
-      return product.map(product => ({
+      const products = await Product.find();
+      console.log('Productos obtenidos desde la base de datos:', products); 
+      return products.map(product => ({
+        id: product._id,
         name: product.name,
         description: product.description,
         price: product.price
