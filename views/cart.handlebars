@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Carrito de Compras</title>
   <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/cart.js" defer></script>
 </head>
-
 <body>
   <header>
     <h1>Carrito de Compras</h1>
@@ -34,17 +33,21 @@
           <span>{{this.productId.description}}</span>
           <span>{{this.quantity}}</span>
           <span>${{this.productId.price}}</span>
-          <form action="/api/carts/remove" method="POST">
-            <input type="hidden" name="productId" value="{{this.productId._id}}">
+          <span>Total: ${{multiply this.productId.price this.quantity}}</span>
+          <form class="deleteForm" data-cid="{{../cart._id}}" data-pid="{{this.productId._id}}">
             <button type="submit">Eliminar</button>
           </form>
-        </li>
+         </li>
       {{/each}}
     </ul>
+    <h3>Total de productos: <span id="totalQuantity">{{totalQuantity}}</span></h3>
+    <h3>Total de la compra: $<span id="totalPrice">{{totalPrice}}</span></h3>
+    <form action="/api/carts/purchase/{{cart._id}}" method="POST">
+      <button type="submit">Finalizar Compra</button>
+    </form>
   </main>
   <footer>
     <p>&copy; EcommerceMati</p>
   </footer>
 </body>
-
 </html>

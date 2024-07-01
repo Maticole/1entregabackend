@@ -167,11 +167,12 @@ mongoose.connect(config.mongodbURI, {
 
        helpers: {
         eq: (a, b) => a === b,
+        multiply: (a, b) => a * b,
       },
      });
    
 
-     app.engine('handlebars', hbs.engine);
+    app.engine('handlebars', hbs.engine);
     app.set('view engine', 'handlebars');
     app.set('views', path.join(__dirname, 'views'));
 
@@ -276,6 +277,13 @@ mongoose.connect(config.mongodbURI, {
       });
     });
 
+    app.post('/api/carts/remove/:productId', isAuthenticated, authorizeUser(['user', 'premium', 'admin']), cartController.removeFromCart);
+    app.post('/api/carts/purchase/:cartId', isAuthenticated, authorizeUser(['user', 'premium', 'admin']), cartController.purchaseCart);
+
+    server.listen(PORT, () => {
+      console.log(`Servidor escuchando en el puerto ${PORT}`);
+    });
+
     io.on('connection', (socket) => {
       console.log('Nuevo cliente conectado');
 
@@ -283,10 +291,7 @@ mongoose.connect(config.mongodbURI, {
         console.log('Cliente desconectado');
       });
     });
-
-    server.listen(PORT, () => {
-      console.log(`Servidor Express iniciado en el puerto ${PORT}`);
-    });
+    
   })
   .catch(err => {
     console.error('Error al conectar a MongoDB Atlas:', err);

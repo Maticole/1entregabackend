@@ -5,6 +5,14 @@ const passport = require('passport');
  * @param {Array} roles - Lista de roles permitidos.
  * @returns {Function} Middleware de autorización.
  */
+
+const isAuthenticated = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/login');
+};
+
 const authorizeUser = (roles) => {
     return (req, res, next) => {
       console.log('Verificando autenticación del usuario:', req.isAuthenticated());
@@ -26,4 +34,4 @@ const authorizeUser = (roles) => {
   };
 };
 
-module.exports = { authorizeUser };
+module.exports = { isAuthenticated, authorizeUser };

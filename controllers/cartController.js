@@ -3,18 +3,19 @@ const cartManager = DAOFactory.getDAO('fileSystem');
 const ProductManager = require('../dao/fileSystem/ProductManager');
 const productManager = new ProductManager();
 const Ticket = require('../dao/models/ticketModel');
+const { v4: uuidv4 } = require('uuid');
 
 async function addToCart(req, res) {
   try {
-    const { productId } = req.body;
+    const { productId, quantity } = req.body;
     const userId = req.user._id;
 
     console.log('Request Body:', req.body);
     console.log('Product ID:', productId);  
     console.log('User ID:', userId);        
 
-    if (!productId) {
-      return res.status(400).json({ error: 'Product ID is required' });
+    if (!productId || !quantity) {
+      return res.status(400).json({ error: 'Product ID and quantity are required' });
     }
 
     const isPremium = req.user.role === 'premium';
@@ -28,8 +29,8 @@ async function addToCart(req, res) {
       return res.status(403).json({ error: 'No puedes agregar tu propio producto al carrito' });
     }
 
-    const cart = await cartManager.addToCart(req.user._id, productId);
-    return res.status(200).json(cart);
+    await cartManager.addToCart(userId, productId, quantity);
+    return res.redirect('/cart'); 
   } catch (error) {
     console.error('Error al agregar producto al carrito:', error);
     return res.status(500).json({ error: error.message });
@@ -49,11 +50,21 @@ async function getAllCarts(req, res) {
 async function removeFromCart(req, res) {
   const { cid, pid } = req.params;
   try {
-    const cart = await cartManager.getCartById(cid);
-    const updatedProducts = cart.products.filter(product => product.productId.toString() !== pid);
-    cart.products = updatedProducts;
-    await cart.save();
-    res.status(204).send();
+    const cart = await cartManager.getCartById(cid); 
+    if (!cart) {
+      return res.status(404).json({ error: 'Carrito no encontrado' });
+    }
+
+    const productIndex = cart.products.findIndex(product => product.productId.equals(pid));
+    if (productIndex === -1) {
+      return res.status(404).json({ error: 'Producto no encontrado en el carrito' });
+    }
+
+    cart.products.splice(productIndex, 1); 
+
+    await cart.save(); 
+
+    res.status(204).send(); 
   } catch (error) {
     console.error("Error al eliminar el producto del carrito:", error.message);
     res.status(500).json({ error: "Error interno del servidor" });
@@ -62,8 +73,8 @@ async function removeFromCart(req, res) {
 
 async function purchaseCart(req, res) {
   try {
-    const { cid } = req.params;
-    const cart = await cartManager.getCartById(cid);
+    const cartId = req.params.cartId;
+    const cart = await cartManager.getCartById(cartId); 
     const products = cart.products;
 
     for (const product of products) {
@@ -80,13 +91,16 @@ async function purchaseCart(req, res) {
     }
 
     const ticket = new Ticket({
-      code: 'ABC123',
-      amount: 100,
+      code: uuidv4(), 
+      amount: products.reduce((total, product) => total + (product.quantity * product.productId.price), 0),
       purchaser: req.user.email,
     });
     await ticket.save();
 
-    res.json({ message: 'Compra realizada exitosamente', ticket });
+    cart.products = [];
+    await cart.save();
+
+    res.render('ticket', { ticket, user: req.user });
   } catch (error) {
     console.error('Error al procesar la compra:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -94,9 +108,19 @@ async function purchaseCart(req, res) {
 }
 
 async function viewCart(req, res) {
+  const { userId } = req.user; 
+
   try {
-    const cart = await cartManager.getCartByUserId(req.user._id); 
-    res.render('cart', { cart }); 
+    const cart = await cartManager.getCartByUserId(userId);
+
+    if (!cart) {
+      return res.render('cart', { cart: null, totalQuantity: 0, totalPrice: 0 });
+    }
+
+    const totalQuantity = cart.products.reduce((sum, product) => sum + product.quantity, 0);
+    const totalPrice = cart.products.reduce((sum, product) => sum + (product.quantity * product.productId.price), 0);
+
+    res.render('cart', { cart, totalQuantity, totalPrice });
   } catch (error) {
     console.error("Error al obtener el carrito:", error.message);
     res.status(500).json({ error: "Error interno del servidor" });

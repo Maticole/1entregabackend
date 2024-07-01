@@ -1,8 +1,9 @@
 const express = require('express');
 const cartController = require('../controllers/cartController');
-const { authorizeUser } = require('../utils/authMiddleware');
+const { isAuthenticated, authorizeUser } = require('../utils/authMiddleware');
 const cartRouter = express.Router();
 const { errorHandler } = require('../utils/errorHandler');
+const { authenticate } = require('passport');
 
 /**
  * @swagger
@@ -44,7 +45,7 @@ const { errorHandler } = require('../utils/errorHandler');
  *       '500':
  *         description: Error interno del servidor.
  */
-cartRouter.post('/', authorizeUser(['user', 'admin', 'premium']), errorHandler(cartController.addToCart));
+cartRouter.post('/', isAuthenticated, authorizeUser(['user', 'admin', 'premium']), errorHandler(cartController.addToCart));
 
 /**
  * @swagger
@@ -76,7 +77,7 @@ cartRouter.post('/', authorizeUser(['user', 'admin', 'premium']), errorHandler(c
  *       '500':
  *         description: Error interno del servidor.
  */
-cartRouter.delete('/:cid/remove/:pid', authorizeUser(['user', 'admin', 'premium']), errorHandler(cartController.removeFromCart));
+cartRouter.delete('/:cid/remove/:pid', isAuthenticated, authorizeUser(['user', 'admin', 'premium']), cartController.removeFromCart);
 
 /**
  * @swagger
@@ -102,7 +103,7 @@ cartRouter.delete('/:cid/remove/:pid', authorizeUser(['user', 'admin', 'premium'
  *       '500':
  *         description: Error interno del servidor.
  */
-cartRouter.post('/:cid/purchase', authorizeUser(['user', 'admin', 'premium']), errorHandler(cartController.purchaseCart));
+cartRouter.post('/:cid/purchase', isAuthenticated, authorizeUser(['user', 'admin', 'premium']), errorHandler(cartController.purchaseCart));
 
 /**
  * @swagger
@@ -119,7 +120,7 @@ cartRouter.post('/:cid/purchase', authorizeUser(['user', 'admin', 'premium']), e
  *       '500':
  *         description: Error interno del servidor.
  */
-cartRouter.get('/view', authorizeUser(['user', 'admin', 'premium']), errorHandler(cartController.viewCart));
+cartRouter.get('/view', isAuthenticated, authorizeUser(['user', 'admin', 'premium']), errorHandler(cartController.viewCart));
 
 /**
  * @swagger
@@ -152,6 +153,6 @@ cartRouter.get('/view', authorizeUser(['user', 'admin', 'premium']), errorHandle
  *       '500':
  *         description: Error interno del servidor.
  */
-cartRouter.post('/add-multiple', authorizeUser(['user', 'admin', 'premium']), errorHandler(cartController.addMultipleToCart));
+cartRouter.post('/add-multiple', isAuthenticated, authorizeUser(['user', 'admin', 'premium']), errorHandler(cartController.addMultipleToCart));
 
 module.exports = cartRouter;    

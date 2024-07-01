@@ -1,4 +1,4 @@
-const Cart = require('../models/cartSchema'); 
+const Cart = require('../models/cartSchema');
 
 class CartManager {
   constructor() {
@@ -26,7 +26,16 @@ class CartManager {
     }
   }
 
-  async addToCart(userId, productId) {
+  async getCartByUserId(userId) {
+    try {
+      return await this.Cart.findOne({ userId }).populate('products.productId');
+    } catch (error) {
+      console.error("Error al obtener el carrito por userId:", error.message);
+      return null;
+    }
+  }
+
+  async addToCart(userId, productId, quantity) {
     try {
       let cart = await this.Cart.findOne({ userId });
       if (!cart) {
@@ -38,9 +47,9 @@ class CartManager {
       );
 
       if (productIndex !== -1) {
-        cart.products[productIndex].quantity += 1;
+        cart.products[productIndex].quantity += quantity;
       } else {
-        cart.products.push({ productId, quantity: 1 });
+        cart.products.push({ productId, quantity });
       }
 
       await cart.save();
