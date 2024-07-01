@@ -108,12 +108,12 @@ async function purchaseCart(req, res) {
 }
 
 async function viewCart(req, res) {
-  const { userId } = req.user; 
+  const userId = req.user._id;
 
   try {
     const cart = await cartManager.getCartByUserId(userId);
 
-    if (!cart) {
+    if (!cart || cart.products.length === 0) {
       return res.render('cart', { cart: null, totalQuantity: 0, totalPrice: 0 });
     }
 

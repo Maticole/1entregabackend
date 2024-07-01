@@ -25,7 +25,8 @@
       </ul>
     </nav>
   </header>
-  <main>
+   <main>
+    {{#if cart.products.length}}
     <ul>
       {{#each cart.products}}
         <li>
@@ -40,11 +41,14 @@
          </li>
       {{/each}}
     </ul>
-    <h3>Total de productos: <span id="totalQuantity">{{totalQuantity}}</span></h3>
-    <h3>Total de la compra: $<span id="totalPrice">{{totalPrice}}</span></h3>
+    <h3>Total de productos: {{totalQuantity}}</h3>
+    <h3>Total de la compra: ${{totalPrice}}</h3>
     <form action="/api/carts/purchase/{{cart._id}}" method="POST">
       <button type="submit">Finalizar Compra</button>
     </form>
+    {{else}}
+      <p>El carrito está vacío.</p>
+    {{/if}}
   </main>
   <footer>
     <p>&copy; EcommerceMati</p>
