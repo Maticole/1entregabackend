@@ -26,6 +26,7 @@ const flash = require('connect-flash');
 const bcrypt = require('bcrypt');
 const User = require('./dao/models/userModel');
 const methodOverride = require('method-override');
+const adminRouter = require('./routes/adminRouter');
 
 
 const app = express();
@@ -184,6 +185,7 @@ mongoose.connect(config.mongodbURI, {
     app.use('/api/products', productRouter);
     app.use('/api/carts', cartRouter);
     app.use('/auth', authRouter);
+    app.use('/', adminRouter);
 
     app.get('/', isAuthenticated, (req, res) => {
       redirectBasedOnRole(req, res);

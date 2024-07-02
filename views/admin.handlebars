@@ -14,7 +14,6 @@
     <nav>
       <ul>
         <li><a href="/">Inicio</a></li>
-        <li><a href="/cart">Carrito</a></li>
         <li><a href="/admin">Administrar Productos</a></li>
         <li><a href="/logout">Cerrar Sesión</a></li>
       </ul>
@@ -27,14 +26,23 @@
           <span>{{this.name}}</span>
           <span>{{this.description}}</span>
           <span>${{this.price}}</span>
-          <form action="/api/carts" method="POST">
-            <input type="hidden" name="productId" value="{{this.id}}">
-            <input type="number" name="quantity" value="1" min="1" max="10">
-            <button type="submit">Agregar al carrito</button>
+          <button onclick="location.href='/admin/product/{{this._id}}/edit'">Editar</button>
+          <form action="/admin/product/{{this._id}}?_method=DELETE" method="POST">
+            <button type="submit">Eliminar</button>
           </form>
         </li>
       {{/each}}
     </ul>
+    <h2>Agregar Producto</h2>
+    <form action="/admin/product" method="POST">
+        <label for="name">Nombre:</label>
+        <input type="text" id="name" name="name" required>
+        <label for="description">Descripción:</label>
+        <input type="text" id="description" name="description" required>
+        <label for="price">Precio:</label>
+        <input type="number" id="price" name="price" required>
+        <button type="submit">Agregar</button>
+    </form>
   </main>
   <footer>
     <p>&copy; EcommerceMati</p>
