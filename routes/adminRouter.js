@@ -1,5 +1,6 @@
 const express = require('express');
 const Product = require('../dao/models/productSchema');
+const Cart = require('../dao/models/cartSchema');
 const { authorizeUser } = require('../utils/authMiddleware');
 
 const adminRouter = express.Router();
@@ -15,9 +16,9 @@ adminRouter.get('/admin', authorizeUser(['admin']), async (req, res) => {
 });
 
 adminRouter.post('/admin/product', authorizeUser(['admin']), async (req, res) => {
-    const { name, description, price } = req.body;
+    const { name, description, price, premiumOnly } = req.body;
     try {
-        const newProduct = new Product({ name, description, price, owner: req.user._id });
+        const newProduct = new Product({ name, description, price, premiumOnly: premiumOnly === 'on', owner: req.user._id });
         await newProduct.save();
         res.redirect('/admin');
     } catch (error) {
@@ -58,6 +59,39 @@ adminRouter.delete('/admin/product/:id', authorizeUser(['admin']), async (req, r
     } catch (error) {
         console.error('Error al eliminar producto:', error);
         res.status(500).send('Error interno del servidor');
+    }
+});
+
+adminRouter.get('/premium', authorizeUser(['premium']), async (req, res) => {
+    try {
+      const premiumProducts = await Product.find({ premiumOnly: true });
+      res.render('premium', { products: premiumProducts });
+    } catch (error) {
+      console.error('Error al obtener productos premium:', error);
+      res.status(500).send('Error interno del servidor');
+    }
+  });
+
+  adminRouter.post('/premium/cart', authorizeUser(['premium']), async (req, res) => {
+    const { productId, quantity } = req.body;
+    try {
+        let cart = await Cart.findOne({ userId: req.user._id });
+        if (!cart) {
+            cart = new Cart({ userId: req.user._id, products: [] });
+        }
+        const productIndex = cart.products.findIndex(product => product.productId.toString() === productId);
+        if (productIndex > -1) {
+            cart.products[productIndex].quantity += parseInt(quantity, 10);
+        } else {
+            cart.products.push({ productId, quantity: parseInt(quantity, 10) });
+        }
+        await cart.save();
+        req.flash('success', 'Producto agregado al carrito');
+        res.redirect('/cart'); 
+    } catch (error) {
+        console.error('Error al agregar al carrito:', error);
+        req.flash('error', 'Error al agregar al carrito');
+        res.redirect('/premium');
     }
 });
 

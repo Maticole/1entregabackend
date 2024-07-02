@@ -18,6 +18,10 @@ const productSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+  premiumOnly: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 module.exports = mongoose.models.Product || mongoose.model('Product', productSchema);

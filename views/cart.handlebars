@@ -18,6 +18,9 @@
           {{#if (eq user.role 'admin')}}
             <li><a href="/admin">Administrar Productos</a></li>
           {{/if}}
+          {{#if (eq user.role 'premium')}}
+            <li><a href="/premium">Productos Premium</a></li>
+          {{/if}}
           <li><a href="/logout">Cerrar Sesión</a></li>
         {{else}}
           <li><a href="/login">Iniciar Sesión</a></li>
@@ -25,7 +28,7 @@
       </ul>
     </nav>
   </header>
-   <main>
+  <main>
     {{#if cart.products.length}}
     <ul>
       {{#each cart.products}}
@@ -35,10 +38,14 @@
           <span>{{this.quantity}}</span>
           <span>${{this.productId.price}}</span>
           <span>Total: ${{multiply this.productId.price this.quantity}}</span>
-          <form class="deleteForm" data-cid="{{../cart._id}}" data-pid="{{this.productId._id}}">
+          {{#if this.productId.premiumOnly}}
+            <span>(Producto Premium)</span>
+          {{/if}}
+          <form class="deleteForm" action="/cart/{{this.productId._id}}" method="POST">
+            <input type="hidden" name="_method" value="DELETE">
             <button type="submit">Eliminar</button>
           </form>
-         </li>
+        </li>
       {{/each}}
     </ul>
     <h3>Total de productos: {{totalQuantity}}</h3>

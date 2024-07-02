@@ -4,17 +4,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Premium - Lista de Productos</title>
+  <title>Productos Premium</title>
   <link rel="stylesheet" href="/css/styles.css">
 </head>
 
 <body>
   <header>
-    <h1>Premium - Lista de Productos</h1>
+    <h1>Productos Premium</h1>
     <nav>
       <ul>
         <li><a href="/">Inicio</a></li>
-        <li><a href="/cart">Carrito</a></li>
+        <li><a href="/premium">Productos Premium</a></li>
         <li><a href="/logout">Cerrar Sesión</a></li>
       </ul>
     </nav>
@@ -26,9 +26,10 @@
           <span>{{this.name}}</span>
           <span>{{this.description}}</span>
           <span>${{this.price}}</span>
-          <form action="/api/carts" method="POST">
-            <input type="hidden" name="productId" value="{{this.id}}">
-            <input type="number" name="quantity" value="1" min="1" max="10">
+          <form action="/premium/cart" method="POST">
+            <input type="hidden" name="productId" value="{{this._id}}">
+            <label for="quantity">Cantidad:</label>
+            <input type="number" id="quantity" name="quantity" min="1" value="1" required>
             <button type="submit">Agregar al carrito</button>
           </form>
         </li>

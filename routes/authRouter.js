@@ -17,6 +17,7 @@ function redirectBasedOnRole(req, res) {
   }
 }
 
+
 authRouter.post('/login', (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
     if (err) {
@@ -39,7 +40,7 @@ authRouter.post('/login', (req, res, next) => {
 });
 
 authRouter.post('/register', async (req, res) => {
-  const { email, password, username } = req.body;
+  const { email, password, username, role } = req.body;
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -48,8 +49,13 @@ authRouter.post('/register', async (req, res) => {
     }
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = new User({ email, password: hashedPassword, username, role: 'premium' });
-    
+    const newUser = new User({
+      username,
+      email,
+      password: hashedPassword,
+      role: role || 'user', 
+    });
+
     await newUser.save();
     req.flash('success', 'Registro exitoso, por favor inicie sesión');
     res.redirect('/login');

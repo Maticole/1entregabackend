@@ -3,22 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin - Lista de Productos</title>
+  <title>Admin - Productos Premium</title>
   <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
   <header>
-    <h1>Admin - Lista de Productos</h1>
+    <h1>Admin - Productos Premium</h1>
     <nav>
       <ul>
         <li><a href="/">Inicio</a></li>
         <li><a href="/admin">Administrar Productos</a></li>
-        <li><a href="/admin/premium">Administrar Productos Premium</a></li>
         <li><a href="/logout">Cerrar Sesión</a></li>
       </ul>
     </nav>
   </header>
   <main>
+    <h2>Administrar Productos Premium</h2>
     <ul>
       {{#each products}}
         <li>
@@ -32,18 +32,6 @@
         </li>
       {{/each}}
     </ul>
-    <h2>Agregar Producto</h2>
-    <form action="/admin/product" method="POST">
-        <label for="name">Nombre:</label>
-        <input type="text" id="name" name="name" required>
-        <label for="description">Descripción:</label>
-        <input type="text" id="description" name="description" required>
-        <label for="price">Precio:</label>
-        <input type="number" id="price" name="price" required>
-        <label for="premiumOnly">¿Premium Only?</label>
-        <input type="checkbox" id="premiumOnly" name="premiumOnly">
-        <button type="submit">Agregar</button>
-    </form>
   </main>
   <footer>
     <p>&copy; EcommerceMati</p>
