@@ -29,6 +29,8 @@ router.get('/', authController.restrictTo('admin'), UserController.getAllUsers);
 
 router.delete('/', authController.restrictTo('admin'), UserController.deleteInactiveUsers);
 
+router.post('/', authController.restrictTo('admin'), UserController.registerUser);
+
 router.post('/:uid/documents', UserController.updateLastConnection, upload.array('documents'), UserController.uploadDocuments);
 
 router.patch('/premium/:uid',

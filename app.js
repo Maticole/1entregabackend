@@ -186,6 +186,7 @@ mongoose.connect(config.mongodbURI, {
     app.use('/api/carts', cartRouter);
     app.use('/auth', authRouter);
     app.use('/', adminRouter);
+    app.use('/admin', adminRouter);
 
     app.get('/', isAuthenticated, (req, res) => {
       redirectBasedOnRole(req, res);

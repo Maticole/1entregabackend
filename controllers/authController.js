@@ -92,18 +92,27 @@ const updatePassword = async (req, res) => {
   }
 };
 
-const authorizeUser = (req, res, next) => {
-  const token = req.headers['authorization'];
-  if (!token) {
-    return res.status(403).send({ message: 'No token provided.' });
-  }
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(500).send({ message: 'Failed to authenticate token.' });
+const authorizeUser = (roles = []) => {
+  return (req, res, next) => {
+    const token = req.headers['authorization'];
+    if (!token) {
+      return res.status(403).send({ message: 'No token provided.' });
     }
-    req.userId = decoded.id;
-    next();
-  });
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) {
+        return res.status(500).send({ message: 'Failed to authenticate token.' });
+      }
+      req.userId = decoded.id;
+
+      User.findById(req.userId, (err, user) => {
+        if (err || !user || (roles.length && !roles.includes(user.role))) {
+          return res.status(403).send({ message: 'Access denied.' });
+        }
+        req.user = user;
+        next();
+      });
+    });
+  };
 };
 
 const getCurrentUserDTO = async (req, res) => {

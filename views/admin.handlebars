@@ -26,7 +26,7 @@
           <span>{{this.name}}</span>
           <span>{{this.description}}</span>
           <span>${{this.price}}</span>
-          <button onclick="location.href='/admin/product/{{this._id}}/edit'">Editar</button>
+          <a href="/admin/product/{{this._id}}/edit">Editar</a>
           <form action="/admin/product/{{this._id}}?_method=DELETE" method="POST">
             <button type="submit">Eliminar</button>
           </form>
