@@ -21,6 +21,7 @@ async function createAdminUser() {
 
 
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
+    console.log('Contraseña hasheada:', hashedPassword);
 
     const user = new User({
       username: adminUsername,

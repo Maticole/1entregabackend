@@ -47,9 +47,9 @@ class CartManager {
       );
 
       if (productIndex !== -1) {
-        cart.products[productIndex].quantity += quantity;
+        cart.products[productIndex].quantity += parseInt(quantity); 
       } else {
-        cart.products.push({ productId, quantity });
+        cart.products.push({ productId, quantity: parseInt(quantity) }); 
       }
 
       await cart.save();

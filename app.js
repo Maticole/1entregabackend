@@ -222,7 +222,15 @@ mongoose.connect(config.mongodbURI, {
     app.get('/cart', isAuthenticated, authorizeUser(['user', 'premium', 'admin']), async (req, res) => {
       try {
         const cart = await Cart.findOne({ userId: req.user.id }).populate('products.productId');
-        res.render('cart', { cart });
+    
+        if (cart) {
+          const totalQuantity = cart.products.reduce((sum, product) => sum + product.quantity, 0);
+          const totalPrice = cart.products.reduce((sum, product) => sum + (product.quantity * product.productId.price), 0);
+    
+          res.render('cart', { cart, totalQuantity, totalPrice });
+        } else {
+          res.render('cart', { cart: null, totalQuantity: 0, totalPrice: 0 });
+        }
       } catch (error) {
         console.error('Error al obtener carrito:', error);
         res.status(500).send('Error interno del servidor');
@@ -233,11 +241,28 @@ mongoose.connect(config.mongodbURI, {
       res.render('login');
     });
 
-    app.post('/login', passport.authenticate('local', {
-      failureRedirect: '/login',
-      failureFlash: true
-    }), (req, res) => {
-      redirectBasedOnRole(req, res);
+    app.post('/login', (req, res, next) => {
+      console.log('Intento de login para:', req.body.email);
+      passport.authenticate('local', (err, user, info) => {
+        if (err) {
+          console.error('Error en autenticación:', err);
+          return next(err);
+        }
+        if (!user) {
+          console.log('Usuario no encontrado o contraseña incorrecta:', info.message);
+          req.flash('error', info.message);
+          return res.redirect('/login');
+        }
+        req.logIn(user, (err) => {
+          if (err) {
+            console.error('Error al iniciar sesión:', err);
+            return next(err);
+          }
+          console.log('Autenticación exitosa para usuario:', user.email);
+          req.flash('success', 'Autenticación exitosa');
+          return redirectBasedOnRole(req, res);
+        });
+      })(req, res, next);
     });
 
     app.get('/register', (req, res) => {
