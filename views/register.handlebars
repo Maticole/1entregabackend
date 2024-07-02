@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registrarse</title>
   <link rel="stylesheet" href="/css/styles.css">
 </head>
+
 <body>
   <header>
     <h1>Registrarse</h1>
@@ -22,20 +24,19 @@
     <form action="/auth/register" method="post">
       <label for="username">Nombre de usuario:</label>
       <input type="text" id="username" name="username" required>
-      
+
       <label for="email">Email:</label>
       <input type="email" id="email" name="email" required>
-      
+
       <label for="password">Contraseña:</label>
       <input type="password" id="password" name="password" required>
-      
+
       <label for="role">Rol:</label>
       <select id="role" name="role">
         <option value="user">Usuario</option>
         <option value="premium">Premium</option>
-        <option value="admin">Admin</option>
       </select>
-      
+
       <button type="submit">Registrarse</button>
     </form>
   </main>
@@ -45,4 +46,5 @@
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/socketScript.js"></script>
 </body>
+
 </html>

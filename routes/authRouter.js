@@ -47,7 +47,9 @@ authRouter.post('/register', async (req, res) => {
       return res.redirect('/register');
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ email, password: hashedPassword, username });
+
+    const newUser = new User({ email, password: hashedPassword, username, role: 'premium' });
+    
     await newUser.save();
     req.flash('success', 'Registro exitoso, por favor inicie sesión');
     res.redirect('/login');
