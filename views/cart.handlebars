@@ -41,7 +41,12 @@
           {{#if this.productId.premiumOnly}}
             <span>(Producto Premium)</span>
           {{/if}}
-          <form class="deleteForm" action="/cart/{{this.productId._id}}" method="POST">
+          <form class="deleteForm"
+            action="/cart/{{this.productId._id}}"
+            method="POST"
+            data-cid="{{../cart._id}}"
+            data-pid="{{this.productId._id}}"
+          >
             <input type="hidden" name="_method" value="DELETE">
             <button type="submit">Eliminar</button>
           </form>
